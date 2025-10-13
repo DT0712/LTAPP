@@ -1,67 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth_bloc.dart';
-import '../widgets/auth_text_field.dart';
+import '../blocs/auth_event.dart';
+import '../blocs/auth_state.dart';
 
 class LoginPage extends StatelessWidget {
-  final emailCtrl = TextEditingController();
-  final passCtrl = TextEditingController();
-
-  LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          } else if (state is AuthSuccess) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-        },
-        builder: (context, state) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Ảnh nền
+          Image.asset('assets/images/bg_login.png', fit: BoxFit.cover),
+
+          // Lớp phủ màu đen mờ nhẹ cho dễ đọc nội dung
+          Container(color: Colors.black.withOpacity(0.3)),
+
+          // Form đăng nhập
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     "Đăng nhập",
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  AuthTextField(controller: emailCtrl, hint: "Email"),
-                  AuthTextField(
-                    controller: passCtrl,
-                    hint: "Mật khẩu",
-                    obscure: true,
+                  const SizedBox(height: 16),
+                  TextField(
+                    decoration: const InputDecoration(
+                      labelText: "Email",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  state is AuthLoading
-                      ? CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: () {
-                            context.read<AuthBloc>().add(
-                              LoginEvent(emailCtrl.text, passCtrl.text),
-                            );
-                          },
-                          child: Text("Đăng nhập"),
-                        ),
-                  TextButton(
+                  const SizedBox(height: 12),
+                  TextField(
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: "Mật khẩu",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/register');
+                      context.read<AuthBloc>().add(
+                            const LoginSubmitted("test@gmail.com", "123456"),
+                          );
                     },
-                    child: Text("Chưa có tài khoản? Đăng ký"),
+                    child: const Text("Đăng nhập"),
                   ),
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
