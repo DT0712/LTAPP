@@ -1,5 +1,5 @@
 name: my_app
-description: A new Flutter project.
+description: A new Flutter project
 publish_to: 'none'
 
 environment:
@@ -19,4 +19,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/bg_login.png
+    - assets/images/bglogin.png

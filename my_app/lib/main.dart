@@ -5,7 +5,14 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,9 +31,9 @@ class MyApp extends StatelessWidget {
           '/login': (_) => LoginPage(),
           '/register': (_) => RegisterPage(),
           '/home': (_) => Scaffold(
-            appBar: AppBar(title: Text('Trang chủ')),
-            body: Center(child: Text('🎉 Đăng nhập thành công!')),
-          ),
+                appBar: AppBar(title: Text('Trang chủ')),
+                body: Center(child: Text('🎉 Đăng nhập thành công!')),
+              ),
         },
       ),
     );
