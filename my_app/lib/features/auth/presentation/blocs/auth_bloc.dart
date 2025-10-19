@@ -23,9 +23,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoading());
       try {
         final result = await AuthApi.register(
-          event.username,
           event.email,
           event.password,
+          event.phone,
+          event.birthDate,
         );
         if (result['success']) {
           emit(AuthSuccess(result['message']));

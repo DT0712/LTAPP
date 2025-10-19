@@ -208,8 +208,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   : () {
                                       context.read<AuthBloc>().add(
                                         RegisterEvent(
-                                          username: _usernameController.text
-                                              .trim(),
+                                          email: _usernameController.text
+                                              .trim(), // dùng email thay username
                                           password: _passwordController.text
                                               .trim(),
                                           confirmPassword: _confirmController
