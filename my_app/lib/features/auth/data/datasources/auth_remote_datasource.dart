@@ -1,20 +1,25 @@
-import 'dart:async';
-import '../models/user_model.dart';
-
 class AuthRemoteDataSource {
-  // Mô phỏng API đăng nhập
-  Future<UserModel> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1)); // giả lập delay API
-    if (email == "test@gmail.com" && password == "123456") {
-      return UserModel(id: 1, name: "Duy", email: email);
-    } else {
-      throw Exception("Sai email hoặc mật khẩu!");
+  // Giả lập danh sách user trên "server"
+  static final List<Map<String, String>> _users = [];
+
+  Future<void> register(String name, String email, String password) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    final existed = _users.any((u) => u["email"] == email);
+    if (existed) {
+      throw Exception("Email đã tồn tại");
     }
+
+    _users.add({"name": name, "email": email, "password": password});
   }
 
-  // Mô phỏng API đăng ký
-  Future<UserModel> register(String name, String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return UserModel(id: 99, name: name, email: email);
+  Future<void> login(String email, String password) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    final matched = _users.any(
+      (u) => u["email"] == email && u["password"] == password,
+    );
+
+    if (!matched) throw Exception("Sai email hoặc mật khẩu");
   }
 }

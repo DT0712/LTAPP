@@ -1,29 +1,42 @@
 import 'package:equatable/equatable.dart';
 
 abstract class AuthEvent extends Equatable {
-  const AuthEvent();
-
   @override
   List<Object?> get props => [];
 }
 
-class LoginSubmitted extends AuthEvent {
+class LoginEvent extends AuthEvent {
   final String email;
   final String password;
-
-  const LoginSubmitted(this.email, this.password);
+  LoginEvent(this.email, this.password);
 
   @override
   List<Object?> get props => [email, password];
 }
 
-class RegisterSubmitted extends AuthEvent {
-  final String name;
-  final String email;
+class RegisterEvent extends AuthEvent {
+  final String username;
   final String password;
+  final String confirmPassword;
+  final String phone;
+  final String birthDate;
 
-  const RegisterSubmitted(this.name, this.email, this.password);
+  RegisterEvent({
+    required this.username,
+    required this.password,
+    required this.confirmPassword,
+    required this.phone,
+    required this.birthDate,
+  });
 
   @override
-  List<Object?> get props => [name, email, password];
+  List<Object?> get props => [
+    username,
+    password,
+    confirmPassword,
+    phone,
+    birthDate,
+  ];
 }
+
+class GoogleSignInEvent extends AuthEvent {}
