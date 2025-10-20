@@ -26,7 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthBloc(), // ✅ bloc sẽ gọi API qua auth_api.dart
+      create: (context) => AuthBloc(context.read()),
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
@@ -208,16 +208,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                   : () {
                                       context.read<AuthBloc>().add(
                                         RegisterEvent(
+                                          name: _usernameController.text.trim(),
                                           email: _usernameController.text
-                                              .trim(), // dùng email thay username
+                                              .trim(),
                                           password: _passwordController.text
                                               .trim(),
-                                          confirmPassword: _confirmController
-                                              .text
-                                              .trim(),
-                                          phone: _phoneController.text.trim(),
-                                          birthDate:
-                                              "${_dayController.text}/${_monthController.text}/${_yearController.text}",
                                         ),
                                       );
                                     },

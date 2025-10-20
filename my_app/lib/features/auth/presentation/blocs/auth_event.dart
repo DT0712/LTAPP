@@ -16,28 +16,18 @@ class LoginEvent extends AuthEvent {
 }
 
 class RegisterEvent extends AuthEvent {
+  final String name;
   final String email;
   final String password;
-  final String confirmPassword;
-  final String phone;
-  final String birthDate;
 
   RegisterEvent({
+    required this.name,
     required this.email,
     required this.password,
-    required this.confirmPassword,
-    required this.phone,
-    required this.birthDate,
   });
 
   @override
-  List<Object?> get props => [
-    email,
-    password,
-    confirmPassword,
-    phone,
-    birthDate,
-  ];
+  List<Object?> get props => [name, email, password];
 }
 
 class GoogleSignInEvent extends AuthEvent {}

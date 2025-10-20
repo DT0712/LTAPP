@@ -1,40 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/network/result.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
-import '../../../../network/auth_api.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(AuthInitial()) {
+  final AuthRepository _repository;
+
+  AuthBloc(this._repository) : super(AuthInitial()) {
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading());
-      try {
-        final result = await AuthApi.login(event.email, event.password);
-        if (result['success']) {
-          emit(AuthSuccess(result['message']));
-        } else {
-          emit(AuthFailure(result['message']));
-        }
-      } catch (e) {
-        emit(AuthFailure('Lỗi kết nối máy chủ'));
+      final result = await _repository.login(event.email, event.password);
+      if (result is Success) {
+        emit(AuthSuccess('Đăng nhập thành công'));
+      } else if (result is Failure) {
+        emit(AuthFailure((result as Failure).message));
       }
     });
 
     on<RegisterEvent>((event, emit) async {
       emit(AuthLoading());
-      try {
-        final result = await AuthApi.register(
-          event.email,
-          event.password,
-          event.phone,
-          event.birthDate,
-        );
-        if (result['success']) {
-          emit(AuthSuccess(result['message']));
-        } else {
-          emit(AuthFailure(result['message']));
-        }
-      } catch (e) {
-        emit(AuthFailure('Lỗi kết nối máy chủ'));
+      final result = await _repository.register(
+        event.name,
+        event.email,
+        event.password,
+      );
+      if (result is Success) {
+        emit(AuthSuccess('Đăng ký thành công'));
+      } else if (result is Failure) {
+        emit(AuthFailure((result as Failure).message));
       }
     });
 

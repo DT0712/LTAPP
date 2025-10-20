@@ -15,7 +15,7 @@ class LoginPage extends StatelessWidget {
     final passwordController = TextEditingController();
 
     return BlocProvider(
-      create: (_) => AuthBloc(),
+      create: (context) => AuthBloc(context.read()),
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
