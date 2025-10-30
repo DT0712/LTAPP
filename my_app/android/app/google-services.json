@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009510899641",
+    "project_id": "itour-35106",
+    "storage_bucket": "itour-35106.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009510899641:android:55d4415a3ab107ba1ba068",
+        "android_client_info": {
+          "package_name": "com.example.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4xZZBe_-lH0u8RB9V8G7uHL-jEqepmLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
