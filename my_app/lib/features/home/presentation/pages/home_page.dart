@@ -21,6 +21,26 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      appBar: AppBar(
+        backgroundColor: primaryBlue,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          "Khám phá TP. Hồ Chí Minh",
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.notifications_none, color: Colors.black87),
+          ),
+        ],
+      ),
+
       body: SafeArea(
         bottom: false,
         child: IndexedStack(
@@ -31,7 +51,6 @@ class _HomePageState extends State<HomePage> {
             SingleChildScrollView(
               child: Column(
                 children: [
-                  _buildSearchBar(),
                   _buildBanner(),
                   _buildCategoriesSection(),
                   _buildFeaturedPlacesSection(),
@@ -44,11 +63,11 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // ✅ Nút nổi giữa (màu xanh + icon trắng)
+      // ✅ Nút nổi giữa (Home)
       floatingActionButton: FloatingActionButton(
         onPressed: () => setState(() => _currentIndex = 2),
         backgroundColor: primaryBlue,
-        foregroundColor: const Color.fromARGB(255, 10, 0, 0),
+        foregroundColor: Colors.black,
         elevation: 6,
         shape: const CircleBorder(),
         child: Icon(
@@ -60,7 +79,7 @@ class _HomePageState extends State<HomePage> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      // ✅ Thanh menu dưới (màu xanh + icon trắng)
+      // ✅ Thanh menu dưới
       bottomNavigationBar: BottomAppBar(
         color: primaryBlue,
         shape: const CircularNotchedRectangle(),
@@ -90,7 +109,7 @@ class _HomePageState extends State<HomePage> {
               ),
               onPressed: () => setState(() => _currentIndex = 1),
             ),
-            const SizedBox(width: 40), // khoảng trống cho nút Home
+            const SizedBox(width: 40),
             IconButton(
               icon: Icon(
                 _currentIndex == 3
@@ -115,66 +134,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      color: primaryBlue,
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.search, color: Colors.grey),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Tìm kiếm",
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.filter_alt, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
+  // ✅ Banner trên cùng
   Widget _buildBanner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(25), // Bo góc mềm
+        borderRadius: BorderRadius.circular(25),
         child: AspectRatio(
-          aspectRatio: 16 / 9, // Tỷ lệ giống hình bạn gửi
+          aspectRatio: 16 / 9,
           child: Image.asset(
             'assets/images/Banner.jpg',
-            fit: BoxFit.cover, // Ảnh phủ kín mà không méo
+            fit: BoxFit.cover,
           ),
         ),
       ),
     );
   }
 
-  // ✅ Danh mục không có khung trắng, chỉ hiển thị hình ảnh
+  // ✅ Danh mục (Firestore)
   Widget _buildCategoriesSection() {
     return StreamBuilder<QuerySnapshot>(
       stream: danhMucRef.snapshots(),
@@ -195,6 +172,7 @@ class _HomePageState extends State<HomePage> {
           );
         }
 
+        // ✅ Thứ tự đúng như mẫu
         const order = [
           'quan_an',
           'luu_tru',
@@ -226,35 +204,30 @@ class _HomePageState extends State<HomePage> {
               final ten = data['ten'] ?? '';
               final hinhAnh = data['hinh_anh'] ?? '';
 
-              return GestureDetector(
-                onTap: () {
-                  // TODO: Navigate to category details
-                },
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50), // hình tròn
-                        child: Image.asset(
-                          hinhAnh,
-                          fit: BoxFit.cover,
-                        ),
+              return Column(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: Image.asset(
+                        hinhAnh,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      ten,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    ten,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
                     ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               );
             },
           ),
@@ -263,12 +236,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // ✅ Địa điểm đề xuất (Firestore)
   Widget _buildFeaturedPlacesSection() {
-    const featuredPlaces = [
-      'assets/images/place1.jpg',
-      'assets/images/place2.jpg',
-      'assets/images/place3.jpg',
-    ];
+    final diaDiemRef =
+        FirebaseFirestore.instance.collection('dia_diem_de_xuat');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +247,7 @@ class _HomePageState extends State<HomePage> {
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Text(
-            'Địa điểm nổi bật',
+            'Địa điểm đề xuất',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -284,25 +255,119 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        SizedBox(
-          height: 158,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            scrollDirection: Axis.horizontal,
-            itemCount: featuredPlaces.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 20),
-            itemBuilder: (context, index) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  featuredPlaces[index],
-                  width: 150,
-                  height: 150,
-                  fit: BoxFit.cover,
+        StreamBuilder<QuerySnapshot>(
+          stream: diaDiemRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(color: primaryBlue),
                 ),
               );
-            },
-          ),
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Text("Chưa có địa điểm đề xuất nào."),
+              );
+            }
+
+            final diaDiemDocs = snapshot.data!.docs;
+
+            return SizedBox(
+              height: 220,
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                scrollDirection: Axis.horizontal,
+                itemCount: diaDiemDocs.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final data =
+                      diaDiemDocs[index].data() as Map<String, dynamic>;
+                  final ten = data['ten'] ?? '';
+                  final hinhAnh = data['hinh_anh'] ?? '';
+                  final diaChi = data['dia_chi'] ?? '';
+                  final danhGia = data['danh_gia'] ?? 0.0;
+
+                  return Container(
+                    width: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          child: Image.asset(
+                            hinhAnh,
+                            height: 120,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ten,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                diaChi,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  const Icon(Icons.star,
+                                      color: Colors.amber, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    danhGia.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
         const SizedBox(height: 20),
       ],
