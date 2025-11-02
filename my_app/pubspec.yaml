@@ -41,4 +41,5 @@ flutter:
   assets:
     - assets/images/DanhMuc/
     - assets/images/DiaDiem/
+    - assets/images/food/
     - assets/images/Banner.jpg

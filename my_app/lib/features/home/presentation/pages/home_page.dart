@@ -13,12 +13,25 @@ class _HomePageState extends State<HomePage> {
   static const Color primaryBlue = Color(0xFFAED2FF);
   static const Color backgroundColor = Color(0xFFF7F9FC);
 
+  // Firestore collections
   final CollectionReference danhMucRef =
       FirebaseFirestore.instance.collection('danh_muc');
-  final CollectionReference diaDiemRef =
+  final CollectionReference diaDiemDeXuatRef =
       FirebaseFirestore.instance.collection('dia_diem_de_xuat');
+  final CollectionReference placesRef =
+      FirebaseFirestore.instance.collection('places');
+  final CollectionReference quanHuyenRef =
+      FirebaseFirestore.instance.collection('quan_huyen');
 
-  int _currentIndex = 2; // Trang Home ở giữa
+  // state
+  int _currentIndex = 2;
+  String? selectedQuan;
+  bool showFilterPanel = false;
+
+  // Làm sạch chuỗi: loại bỏ non-breaking space, khoảng trắng thừa
+  String cleanText(String s) {
+    return s.replaceAll('\u00A0', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +48,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   _buildAppBar(),
+                  if (showFilterPanel) _buildFilterPanel(),
                   _buildBanner(),
                   _buildCategoriesSection(),
                   _buildSuggestedPlacesSection(),
@@ -74,7 +88,6 @@ class _HomePageState extends State<HomePage> {
                     ? Icons.calendar_today
                     : Icons.calendar_today_outlined,
                 color: Colors.white,
-                size: 26,
               ),
               onPressed: () => setState(() => _currentIndex = 0),
             ),
@@ -84,7 +97,6 @@ class _HomePageState extends State<HomePage> {
                     ? Icons.chat_bubble
                     : Icons.chat_bubble_outline,
                 color: Colors.white,
-                size: 26,
               ),
               onPressed: () => setState(() => _currentIndex = 1),
             ),
@@ -95,7 +107,6 @@ class _HomePageState extends State<HomePage> {
                     ? Icons.notifications
                     : Icons.notifications_outlined,
                 color: Colors.white,
-                size: 26,
               ),
               onPressed: () => setState(() => _currentIndex = 3),
             ),
@@ -103,7 +114,6 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(
                 _currentIndex == 4 ? Icons.person : Icons.person_outline,
                 color: Colors.white,
-                size: 26,
               ),
               onPressed: () => setState(() => _currentIndex = 4),
             ),
@@ -113,7 +123,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🔹 AppBar
+  // ---------------- AppBar ----------------
   Widget _buildAppBar() {
     return Container(
       width: double.infinity,
@@ -124,12 +134,12 @@ class _HomePageState extends State<HomePage> {
           bottomRight: Radius.circular(30),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       child: Row(
         children: [
           Expanded(
             child: Container(
-              height: 45, // chiều cao đồng bộ
+              height: 48,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -142,8 +152,10 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Tìm kiếm",
+                        hintText: "Tìm kiếm địa điểm",
                         border: InputBorder.none,
+                        isCollapsed: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -152,17 +164,25 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            height: 45, // cùng chiều cao với ô tìm kiếm
-            width: 45,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade700,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              FontAwesomeIcons.sliders,
-              color: Colors.white,
-              size: 18,
+          InkWell(
+            onTap: () {
+              setState(() {
+                showFilterPanel = !showFilterPanel;
+              });
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade700,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                FontAwesomeIcons.sliders,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
           ),
         ],
@@ -170,12 +190,87 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🔹 Banner
+  // ---------------- Panel lọc ----------------
+  Widget _buildFilterPanel() {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  "Chọn quận để lọc",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              if (selectedQuan != null)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedQuan = null;
+                      showFilterPanel = false;
+                    });
+                  },
+                  child: const Text("Bỏ lọc"),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 48,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: quanHuyenRef.orderBy('ten').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final docs = snapshot.data!.docs;
+                return ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  itemCount: docs.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final rawTen =
+                        (doc.data() as Map<String, dynamic>)['ten'] as String?;
+                    final ten = cleanText(rawTen ?? doc.id);
+
+                    print("QUAN_HUYEN: '$ten' | len: ${ten.length}");
+
+                    final bool isSelected = ten == selectedQuan;
+
+                    return _FilterChipDistrict(
+                      label: ten,
+                      selected: isSelected,
+                      onTap: () {
+                        setState(() {
+                          selectedQuan = ten;
+                          showFilterPanel = false;
+                        });
+                        print("SELECTED QUAN: '$ten'");
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- Banner ----------------
   Widget _buildBanner() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         child: AspectRatio(
           aspectRatio: 16 / 9,
           child: Image.asset(
@@ -187,25 +282,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🔹 Danh mục
+  // ---------------- Danh mục ----------------
   Widget _buildCategoriesSection() {
     return StreamBuilder<QuerySnapshot>(
       stream: danhMucRef.snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.all(20.0),
-            child: CircularProgressIndicator(color: primaryBlue),
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Text("Chưa có danh mục nào."),
-          );
-        }
-
+        final docs = snapshot.data!.docs;
         const order = [
           'quan_an',
           'luu_tru',
@@ -215,25 +304,24 @@ class _HomePageState extends State<HomePage> {
           'tien_ich'
         ];
 
-        final danhMucDocs = snapshot.data!.docs
-            .where((doc) => order.contains(doc.id))
-            .toList()
+        final danhMucDocs = docs.where((d) => order.contains(d.id)).toList()
           ..sort((a, b) => order.indexOf(a.id).compareTo(order.indexOf(b.id)));
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: danhMucDocs.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 20,
+              mainAxisSpacing: 18,
+              crossAxisSpacing: 18,
               childAspectRatio: 0.8,
             ),
             itemBuilder: (context, index) {
-              final data = danhMucDocs[index].data() as Map<String, dynamic>;
+              final data =
+                  danhMucDocs[index].data() as Map<String, dynamic>? ?? {};
               final ten = data['ten'] ?? '';
               final hinhAnh = data['hinh_anh'] ?? '';
 
@@ -245,6 +333,7 @@ class _HomePageState extends State<HomePage> {
                       child: Image.asset(
                         hinhAnh,
                         fit: BoxFit.cover,
+                        width: double.infinity,
                       ),
                     ),
                   ),
@@ -267,132 +356,216 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🔹 Địa điểm đề xuất
+  // ---------------- Địa điểm (ĐÃ SỬA LOG + BỎ ORDERBY) ----------------
   Widget _buildSuggestedPlacesSection() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: diaDiemRef.snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.all(20.0),
-            child: CircularProgressIndicator(color: primaryBlue),
-          );
-        }
+    final Query query = (selectedQuan == null)
+        ? diaDiemDeXuatRef.orderBy('danh_gia', descending: true)
+        : placesRef.where('quan',
+            isEqualTo: cleanText(selectedQuan!)); // BỎ orderBy
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+    if (selectedQuan != null) {
+      print("QUERY: where('quan', isEqualTo: '${cleanText(selectedQuan!)}')");
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: query.snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
           return const Padding(
             padding: EdgeInsets.all(20.0),
-            child: Text("Chưa có địa điểm đề xuất."),
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 
         final docs = snapshot.data!.docs;
+        print("KẾT QUẢ: ${docs.length} documents");
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               child: Text(
-                'Địa điểm đề xuất',
-                style: TextStyle(
+                selectedQuan == null
+                    ? 'Địa điểm đề xuất'
+                    : 'Địa điểm ở $selectedQuan',
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
             ),
-            SizedBox(
-              height: 220,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                scrollDirection: Axis.horizontal,
-                itemCount: docs.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 20),
-                itemBuilder: (context, index) {
-                  final data = docs[index].data() as Map<String, dynamic>;
-                  final ten = data['ten'] ?? '';
-                  final diaChi = data['dia_chi'] ?? '';
-                  final hinhAnh = data['hinh_anh'] ?? '';
-                  final danhGia = data['danh_gia'] ?? '0';
+            if (docs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    const Text("Không có địa điểm nào."),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Query: ${selectedQuan ?? 'Tất cả'}",
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(
+                height: 220,
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: docs.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                    final data =
+                        docs[index].data() as Map<String, dynamic>? ?? {};
+                    final quanInPlace = data['quan'] as String?;
+                    final ten = data['ten'] ?? 'Không tên';
 
-                  return Container(
-                    width: 160,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16)),
-                          child: Image.asset(
-                            hinhAnh,
-                            width: 160,
-                            height: 110,
-                            fit: BoxFit.cover,
+                    // LOG CHI TIẾT MỖI DOCUMENT
+                    print("${docs[index].id}: quan='$quanInPlace', ten='$ten'");
+
+                    final diaChi = data['dia_chi'] ?? '';
+                    final hinhAnh = data['hinh_anh'] ?? '';
+                    final danhGia = data['danh_gia'] ?? '0';
+
+                    return Container(
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.18),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ten,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                diaChi,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black54,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star,
-                                      color: Colors.amber, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    danhGia.toString(),
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ),
-                            ],
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(14)),
+                            child: Image.asset(
+                              hinhAnh,
+                              width: 160,
+                              height: 110,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  ten,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  diaChi,
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.black54),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.star,
+                                        size: 16, color: Colors.amber),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      danhGia.toString(),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
           ],
         );
       },
+    );
+  }
+}
+
+// ---------------- Custom chip ----------------
+class _FilterChipDistrict extends StatefulWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FilterChipDistrict({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  State<_FilterChipDistrict> createState() => _FilterChipDistrictState();
+}
+
+class _FilterChipDistrictState extends State<_FilterChipDistrict> {
+  bool hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool active = widget.selected;
+    final bg = active
+        ? Colors.blue.shade50
+        : hovering
+            ? Colors.grey.shade200
+            : Colors.white;
+    final textColor = active ? Colors.blue : Colors.black87;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => hovering = true),
+      onExit: (_) => setState(() => hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: active ? Colors.blue : Colors.grey.shade300,
+              width: active ? 1.2 : 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              widget.label,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
