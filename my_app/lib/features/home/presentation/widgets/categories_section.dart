@@ -1,7 +1,15 @@
 // lib/features/home/presentation/widgets/categories_section.dart
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // ← BẮT BUỘC
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/home_references.dart';
+
+// Import các trang đích
+import '../pages/categories/food_page.dart';
+import '../pages/categories/hotel_page.dart';
+import '../pages/categories/destination_page.dart';
+import '../pages/categories/entertainment_page.dart';
+import '../pages/categories/transport_page.dart';
+import '../pages/categories/service_page.dart';
 
 class CategoriesSection extends StatelessWidget {
   const CategoriesSection({super.key});
@@ -27,6 +35,7 @@ class CategoriesSection extends StatelessWidget {
           'phuong_tien',
           'tien_ich'
         ];
+
         final sortedDocs = docs.where((d) => order.contains(d.id)).toList()
           ..sort((a, b) => order.indexOf(a.id).compareTo(order.indexOf(b.id)));
 
@@ -44,30 +53,70 @@ class CategoriesSection extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final data = sortedDocs[index].data() as Map<String, dynamic>;
-              return Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.asset(data['hinh_anh'],
-                          fit: BoxFit.cover, width: double.infinity),
+              final id = sortedDocs[index].id;
+
+              return GestureDetector(
+                onTap: () => _navigateToCategoryPage(context, id),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: Image.asset(data['hinh_anh'],
+                            fit: BoxFit.cover, width: double.infinity),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    data['ten'],
-                    style: const TextStyle(
+                    const SizedBox(height: 6),
+                    Text(
+                      data['ten'],
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               );
             },
           ),
         );
       },
+    );
+  }
+
+  void _navigateToCategoryPage(BuildContext context, String id) {
+    Widget page;
+
+    switch (id) {
+      case 'quan_an':
+        page = const FoodPage();
+        break;
+      case 'luu_tru':
+        page = const HotelPage();
+        break;
+      case 'diem_den':
+        page = const DestinationPage();
+        break;
+      case 'khu_vui_choi':
+        page = const EntertainmentPage();
+        break;
+      case 'phuong_tien':
+        page = const TransportPage();
+        break;
+      case 'tien_ich':
+        page = const ServicePage();
+        break;
+      default:
+        page = const Scaffold(
+          body: Center(child: Text('Danh mục chưa hỗ trợ')),
+        );
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => page),
     );
   }
 }
