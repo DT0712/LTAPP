@@ -16,8 +16,9 @@ class RegisterPage extends StatelessWidget {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthFailure) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.error)));
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is AuthSuccess) {
             Navigator.pushReplacementNamed(context, '/home');
           }
@@ -46,11 +47,13 @@ class RegisterPage extends StatelessWidget {
                       ? CircularProgressIndicator()
                       : ElevatedButton(
                           onPressed: () {
-                            context.read<AuthBloc>().add(RegisterEvent(
-                                  nameCtrl.text,
-                                  emailCtrl.text,
-                                  passCtrl.text,
-                                ));
+                            context.read<AuthBloc>().add(
+                              RegisterEvent(
+                                nameCtrl.text,
+                                emailCtrl.text,
+                                passCtrl.text,
+                              ),
+                            );
                           },
                           child: Text("Đăng ký"),
                         ),

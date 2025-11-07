@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth_bloc.dart';
+import '../blocs/auth_event.dart';
+import '../blocs/auth_state.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -55,9 +57,9 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context
-                          .read<AuthBloc>()
-                          .add(const LoginEvent("test@gmail.com", "123456"));
+                      context.read<AuthBloc>().add(
+                            const LoginSubmitted("test@gmail.com", "123456"),
+                          );
                     },
                     child: const Text("Đăng nhập"),
                   ),
