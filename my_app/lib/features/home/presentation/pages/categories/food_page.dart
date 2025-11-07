@@ -1,144 +1,333 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../data/home_references.dart'; // ✅ ĐÃ SỬA đường dẫn
+import '../../../data/home_references.dart';
 
-class FoodPage extends StatelessWidget {
+class FoodPage extends StatefulWidget {
   const FoodPage({super.key});
+
+  @override
+  State<FoodPage> createState() => _FoodPageState();
+}
+
+class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
+  late TabController _tabController;
+  String? selectedQuan;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  /// --- Hàm tạo query theo từng tab ---
+  Stream<QuerySnapshot> _getQuery(String tab) {
+    Query query =
+        HomeReferences.placesRef.where('danh_muc_id', isEqualTo: 'quan_an');
+
+    if (selectedQuan != null && selectedQuan!.isNotEmpty) {
+      query = query.where('quan',
+          isEqualTo: HomeReferences.cleanText(selectedQuan!));
+    }
+
+    switch (tab) {
+      case 'Gợi ý':
+        query = query.orderBy('danh_gia', descending: true);
+        break;
+
+      case 'Mới nhất':
+        query = query.orderBy('ngay_tao', descending: true);
+        break;
+
+      case 'Giảm nhiều':
+        query = query
+            .where('giam_gia', isGreaterThan: 0)
+            .orderBy('giam_gia', descending: true);
+        break;
+
+      case 'Gần tôi':
+        // lọc theo selectedQuan (đã xử lý ở trên)
+        break;
+    }
+
+    return query.snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F8F8),
       appBar: AppBar(
-        title: const Text("Quán ăn nổi bật"),
-        backgroundColor: Colors.deepOrangeAccent,
+        backgroundColor: Colors.white,
+        elevation: 1,
+        title: const Text(
+          "Quán ăn",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.black),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.blueAccent,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.blueAccent,
+          indicatorWeight: 3,
+          tabs: const [
+            Tab(text: "Gợi ý"),
+            Tab(text: "Gần tôi"),
+            Tab(text: "Giảm nhiều"),
+            Tab(text: "Mới nhất"),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list_alt, color: Colors.blueAccent),
+            onPressed: () => _showFilterDialog(context),
+          )
+        ],
       ),
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: HomeReferences.placesRef
-            .where('danh_muc_id', isEqualTo: 'quan_an')
-            .snapshots(), // ✅ ĐÃ ĐÚNG
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Không có dữ liệu."));
-          }
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildFoodList("Gợi ý"),
+          _buildFoodList("Gần tôi"),
+          _buildFoodList("Giảm nhiều"),
+          _buildFoodList("Mới nhất"),
+        ],
+      ),
+    );
+  }
 
-          final foods = snapshot.data!.docs;
+  /// --- Danh sách quán ăn cho từng tab ---
+  Widget _buildFoodList(String tab) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _getQuery(tab),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+        if (snapshot.hasError) {
+          return Center(
+              child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              "Lỗi tải dữ liệu: ${snapshot.error}",
+              style: const TextStyle(color: Colors.redAccent),
             ),
-            itemCount: foods.length,
-            itemBuilder: (context, index) {
-              final data = foods[index].data() as Map<String, dynamic>;
-              return FoodCard(data: data);
-            },
+          ));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          String message;
+          if (tab == "Giảm nhiều") {
+            message = "Hiện chưa có địa điểm giảm giá nào.";
+          } else {
+            message = "Không có địa điểm nào.";
+          }
+          return Center(
+            child: Text(
+              message,
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
+            ),
           );
-        },
+        }
+
+        final foods = snapshot.data!.docs;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(12),
+          itemCount: foods.length,
+          itemBuilder: (context, index) {
+            final data = foods[index].data() as Map<String, dynamic>;
+            return FoodCard(data: data);
+          },
+        );
+      },
+    );
+  }
+
+  /// --- Hộp chọn quận (lọc địa điểm) ---
+  void _showFilterDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (context) {
+        return SizedBox(
+          height: 350,
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              const Text(
+                "Chọn quận",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const Divider(),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream:
+                      HomeReferences.quanHuyenRef.orderBy('ten').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final docs = snapshot.data!.docs;
+                    return ListView.separated(
+                      itemCount: docs.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final data = docs[index].data() as Map<String, dynamic>;
+                        final ten = HomeReferences.cleanText(
+                            data['ten'] ?? docs[index].id);
+                        final selected = ten == selectedQuan;
+
+                        return ListTile(
+                          title: Text(ten),
+                          trailing: selected
+                              ? const Icon(Icons.check,
+                                  color: Colors.blueAccent)
+                              : null,
+                          onTap: () {
+                            setState(() => selectedQuan = ten);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() => selectedQuan = null);
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Bỏ lọc",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
 class FoodCard extends StatelessWidget {
   final Map<String, dynamic> data;
-  const FoodCard({required this.data, super.key});
+  const FoodCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
+    final giamGia = data['giam_gia'] ?? 0;
+
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            )
+        padding: const EdgeInsets.all(10),
+        height: 110,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                data['hinh_anh'] ?? '',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    data['ten'] ?? 'Tên quán ăn',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 15),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      Text(' ${data['danh_gia'] ?? 0}'),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.location_on_outlined,
+                          color: Colors.grey, size: 16),
+                      Expanded(
+                        child: Text(
+                          data['quan'] ?? '',
+                          style:
+                              const TextStyle(color: Colors.grey, fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    data['dia_chi'] ?? '',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Row(
+                    children: [
+                      if (giamGia is num && giamGia > 0)
+                        _buildTag(Icons.local_offer, "Giảm $giamGia%",
+                            Colors.redAccent),
+                      if (data['freeship'] == true)
+                        _buildTag(Icons.local_shipping, "FREESHIP",
+                            Colors.green.shade600),
+                    ],
+                  )
+                ],
+              ),
+            ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Image.network(
-                  data['hinh_anh'] ?? '',
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withOpacity(0.1),
-                      Colors.black.withOpacity(0.6),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 8,
-                right: 8,
-                bottom: 8,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      data['ten'] ?? 'Tên quán',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        shadows: [Shadow(blurRadius: 2, color: Colors.black)],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on,
-                            color: Colors.white70, size: 14),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            data['quan'] ?? '',
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 13),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${data['danh_gia'] ?? 0}/5',
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      ),
+    );
+  }
+
+  Widget _buildTag(IconData icon, String text, Color color) {
+    return Container(
+      margin: const EdgeInsets.only(right: 6, top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        border: Border.all(color: color, width: 1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 13),
+          const SizedBox(width: 2),
+          Text(
+            text,
+            style: TextStyle(
+                color: color, fontWeight: FontWeight.w600, fontSize: 12),
           ),
-        ),
+        ],
       ),
     );
   }
