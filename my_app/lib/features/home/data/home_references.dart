@@ -1,14 +1,13 @@
-// lib/features/home/data/home_references.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeReferences {
-  static final CollectionReference danhMucRef =
+  static final CollectionReference<Map<String, dynamic>> danhMucRef =
       FirebaseFirestore.instance.collection('danh_muc');
-  static final CollectionReference diaDiemDeXuatRef =
+  static final CollectionReference<Map<String, dynamic>> diaDiemDeXuatRef =
       FirebaseFirestore.instance.collection('dia_diem_de_xuat');
-  static final CollectionReference placesRef =
+  static final CollectionReference<Map<String, dynamic>> placesRef =
       FirebaseFirestore.instance.collection('places');
-  static final CollectionReference quanHuyenRef =
+  static final CollectionReference<Map<String, dynamic>> quanHuyenRef =
       FirebaseFirestore.instance.collection('quan_huyen');
 
   static String cleanText(String s) {
