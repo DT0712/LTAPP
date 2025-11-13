@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
         child: IndexedStack(
           index: _currentIndex,
           children: [
-            const Center(child: Text('Calendar Page')),
+            const Center(child: Text('Schedule Page')),
             const Center(child: Text('Chat Page')),
             SingleChildScrollView(
               child: Column(
