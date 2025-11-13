@@ -38,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// 🔹 Đăng nhập bằng Google
   Future<void> _loginWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -70,72 +69,101 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Hình nền
-          Image.asset(
-            'assets/images/bgLogin.jpg',
-            fit: BoxFit.cover,
-            height: double.infinity,
-            width: double.infinity,
+          /// Nền
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bgLogin.jpg',
+              fit: BoxFit.cover,
+            ),
           ),
 
-          // Overlay mờ
-          Container(color: Colors.black.withOpacity(0.25)),
+          /// Lớp phủ tối nhẹ
+          Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.25)),
+          ),
 
-          // Nội dung chính
-          Center(
+          /// Nội dung chính
+          SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(vertical: 40),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'iTour',
-                    style: TextStyle(
-                      fontSize: 52,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                            blurRadius: 12,
-                            color: Colors.black54,
-                            offset: Offset(2, 3))
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Hãy cùng chúng tôi\nKhám phá',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      height: 1.3,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Text(
-                    'VIỆT NAM',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                   const SizedBox(height: 40),
 
-                  // Form đăng nhập
+                  /// Tiêu đề
+                  const Column(
+                    children: [
+                      Text(
+                        "iTour",
+                        style: TextStyle(
+                          fontSize: 54,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontStyle: FontStyle.italic,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 6,
+                              color: Colors.black54,
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        "Hãy cùng chúng tôi",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        "Khám phá",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        "VIỆT NAM",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 80),
+
+                  /// Form đăng nhập
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.symmetric(horizontal: 28),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.85),
-                      borderRadius: BorderRadius.circular(24),
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         TextField(
                           controller: _emailController,
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.person_outline),
-                            hintText: 'Tên đăng nhập',
+                            hintText: "Tên đăng nhập",
                             border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12)),
@@ -148,48 +176,52 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: true,
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.lock_outline),
-                            hintText: 'Mật khẩu',
+                            hintText: "Mật khẩu",
                             border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12)),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
-
-                        // Nút đăng nhập
+                        const SizedBox(height: 22),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _loading ? null : _login,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFAED2FF),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14.0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              elevation: 0,
                             ),
                             child: _loading
                                 ? const CircularProgressIndicator(
                                     color: Colors.white)
                                 : const Text(
-                                    'Đăng nhập',
+                                    "Đăng nhập",
                                     style: TextStyle(
-                                        fontSize: 18, color: Colors.black),
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                           ),
                         ),
-
-                        const SizedBox(height: 12),
-                        const Text("or",
-                            style:
-                                TextStyle(fontSize: 14, color: Colors.black54)),
-
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "or",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            // Google
                             ElevatedButton.icon(
                               onPressed: _loginWithGoogle,
                               icon: Image.asset(
@@ -200,14 +232,14 @@ class _LoginPageState extends State<LoginPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.grey),
+                                side: const BorderSide(color: Colors.black12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
                               ),
                             ),
-
-                            // Apple (placeholder)
                             ElevatedButton.icon(
                               onPressed: () {},
                               icon: Image.asset(
@@ -218,31 +250,35 @@ class _LoginPageState extends State<LoginPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
                                 foregroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.grey),
+                                side: const BorderSide(color: Colors.black12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
                               ),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 10),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const RegisterPage()),
+                            );
+                          },
+                          child: const Text(
+                            "Tạo tài khoản mới",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Liên kết đăng ký
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const RegisterPage()),
-                      );
-                    },
-                    child: const Text(
-                      'Tạo tài khoản mới',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ],

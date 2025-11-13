@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/login_page.dart';
-import 'firebase_options.dart'; // file này được tạo khi bạn chạy lệnh flutterfire configure
+import 'firebase_options.dart'; // Tự động sinh ra sau khi chạy lệnh flutterfire configure
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,14 +14,17 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Kiểm tra kết nối Firestore
+  // ✅ Đăng xuất để luôn quay lại trang đăng nhập khi khởi động lại app
+  await FirebaseAuth.instance.signOut();
+
+  // ✅ Kiểm tra kết nối Firestore (in ra console)
   try {
     final snapshot =
         await FirebaseFirestore.instance.collection('danh_muc').get();
-    print(
+    debugPrint(
         '🔥 Kết nối Firebase thành công! Số danh mục: ${snapshot.docs.length}');
   } catch (e) {
-    print('❌ Lỗi khi kết nối Firebase: $e');
+    debugPrint('❌ Lỗi khi kết nối Firebase: $e');
   }
 
   runApp(const MyApp());
@@ -45,21 +48,22 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      // ✅ Kiểm tra trạng thái đăng nhập Firebase
+      // ✅ Theo dõi trạng thái đăng nhập Firebase
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          // Nếu đang kiểm tra trạng thái đăng nhập
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
-          // Nếu đã đăng nhập
+          // Nếu đã đăng nhập => HomePage
           if (snapshot.hasData) {
             return const HomePage();
           }
 
-          // Nếu chưa đăng nhập
+          // Nếu chưa đăng nhập => LoginPage
           return const LoginPage();
         },
       ),
