@@ -70,7 +70,7 @@ class _HotelListPageState extends State<HotelListPage> {
                     ),
                     const SizedBox(width: 4),
                     const Text(
-                      'DỊCH VỤ',
+                      'LƯU TRÚ',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,
@@ -100,12 +100,6 @@ class _HotelListPageState extends State<HotelListPage> {
                           },
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    const CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.settings, size: 18),
                     ),
                   ],
                 ),

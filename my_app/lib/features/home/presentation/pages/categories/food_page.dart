@@ -39,17 +39,14 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
       case 'Gợi ý':
         query = query.orderBy('danh_gia', descending: true);
         break;
-
       case 'Mới nhất':
         query = query.orderBy('ngay_tao', descending: true);
         break;
-
       case 'Giảm nhiều':
         query = query
             .where('giam_gia', isGreaterThan: 0)
             .orderBy('giam_gia', descending: true);
         break;
-
       case 'Gần tôi':
         // lọc theo selectedQuan (đã xử lý ở trên)
         break;
@@ -61,7 +58,7 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      // 🌈 Không dùng backgroundColor mặc định nữa, để đặt Stack nền đẹp hơn
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -90,13 +87,65 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
           )
         ],
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Stack(
         children: [
-          _buildFoodList("Gợi ý"),
-          _buildFoodList("Gần tôi"),
-          _buildFoodList("Giảm nhiều"),
-          _buildFoodList("Mới nhất"),
+          // --- 🌸 Lớp nền trang trí với các vòng tròn nhạt ---
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFF9FBFC), Color(0xFFFFFFFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          Positioned(
+            top: -80,
+            left: -60,
+            child: Container(
+              width: 230,
+              height: 230,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 120,
+            right: -90,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.cyan.shade50.withOpacity(0.4),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -100,
+            left: -80,
+            child: Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // --- Nội dung TabBarView ---
+          TabBarView(
+            controller: _tabController,
+            children: [
+              _buildFoodList("Gợi ý"),
+              _buildFoodList("Gần tôi"),
+              _buildFoodList("Giảm nhiều"),
+              _buildFoodList("Mới nhất"),
+            ],
+          ),
         ],
       ),
     );
@@ -240,18 +289,7 @@ class FoodCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.network(
-                data['hinh_anh'] ?? '',
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
-                ),
-              ),
+              child: _buildImage(data['hinh_anh']),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -305,6 +343,40 @@ class FoodCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// --- Hàm chọn loại ảnh phù hợp (assets hoặc fallback) ---
+  Widget _buildImage(dynamic path) {
+    if (path == null || path.toString().isEmpty) {
+      return _buildImageFallback();
+    }
+
+    if (path.toString().startsWith('http')) {
+      return Image.network(
+        path,
+        width: 100,
+        height: 100,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildImageFallback(),
+      );
+    }
+
+    return Image.asset(
+      path,
+      width: 100,
+      height: 100,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildImageFallback(),
+    );
+  }
+
+  Widget _buildImageFallback() {
+    return Container(
+      width: 100,
+      height: 100,
+      color: Colors.grey.shade300,
+      child: const Icon(Icons.fastfood, color: Colors.grey),
     );
   }
 
