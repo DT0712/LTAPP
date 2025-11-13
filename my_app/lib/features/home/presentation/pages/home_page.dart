@@ -7,6 +7,7 @@ import '../widgets/filter_panel.dart';
 import '../widgets/home_banner.dart';
 import '../widgets/categories_section.dart';
 import '../widgets/suggested_places_section.dart';
+import '../../../schedule/presentation/pages/schedule_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         child: IndexedStack(
           index: _currentIndex,
           children: [
-            const Center(child: Text('Schedule Page')),
+            const SchedulePage(),
             const Center(child: Text('Chat Page')),
             SingleChildScrollView(
               child: Column(
@@ -64,45 +65,86 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      //FloatingActionButton
       floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() => _currentIndex = 2),
+        onPressed: () {},
         backgroundColor: primaryBlue,
-        foregroundColor: Colors.black,
-        elevation: 6,
+        elevation: 8.0,
         shape: const CircleBorder(),
         child: Icon(
-          _currentIndex == 2 ? Icons.home : Icons.home_outlined,
+          _navIcons[_currentIndex]
+              ['filled'], // Hiển thị icon của trang hiện tại
           color: Colors.black,
-          size: 30,
+          size: 28,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      //BottomAppBar
       bottomNavigationBar: BottomAppBar(
         color: primaryBlue,
         shape: const CircularNotchedRectangle(),
         notchMargin: 6.0,
         elevation: 8,
         clipBehavior: Clip.antiAlias,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-                0, Icons.calendar_today, Icons.calendar_today_outlined),
-            _buildNavItem(1, Icons.chat_bubble, Icons.chat_bubble_outline),
-            const SizedBox(width: 40),
-            _buildNavItem(3, Icons.notifications, Icons.notifications_outlined),
-            _buildNavItem(4, Icons.person, Icons.person_outline),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 2 item bên trái
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: _buildSideItems(left: true),
+              ),
+              const SizedBox(width: 56),
+              // 2 item bên phải
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: _buildSideItems(left: false),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData filled, IconData outlined) {
-    return IconButton(
-      icon:
-          Icon(_currentIndex == index ? filled : outlined, color: Colors.white),
-      onPressed: () => setState(() => _currentIndex = index),
-    );
+  // Icon data mapping for each page index
+  List<Map<String, IconData>> get _navIcons => [
+        {
+          'filled': Icons.calendar_today,
+          'outlined': Icons.calendar_today_outlined
+        },
+        {'filled': Icons.chat_bubble, 'outlined': Icons.chat_bubble_outline},
+        {'filled': Icons.home, 'outlined': Icons.home_outlined},
+        {
+          'filled': Icons.notifications,
+          'outlined': Icons.notifications_outlined
+        },
+        {'filled': Icons.person, 'outlined': Icons.person_outline},
+      ];
+  // Build the left or right side items (two icons each)
+  List<Widget> _buildSideItems({required bool left}) {
+    // all indices
+    final all = [0, 1, 2, 3, 4];
+    // remove the selected index
+    final others = all.where((i) => i != _currentIndex).toList();
+    // left takes first 2, right takes last 2
+    final leftItems = others.take(2).toList();
+    final rightItems = others.skip(2).toList();
+    final pick = left ? leftItems : rightItems;
+    return pick.map((idx) {
+      final icons = _navIcons[idx];
+      final filled = icons['filled']!;
+      final outlined = icons['outlined']!;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: IconButton(
+          icon: Icon(_currentIndex == idx ? filled : outlined,
+              color: Colors.white),
+          onPressed: () => setState(() => _currentIndex = idx),
+        ),
+      );
+    }).toList();
   }
 }
