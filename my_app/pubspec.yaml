@@ -54,3 +54,6 @@ flutter:
     - assets/images/Luutru/
     - assets/images/bgLogin.jpg
     - assets/icons/
+    - assets/images/auth/itour_login_bg.jpg
+    - assets/images/auth/google.png
+    - assets/images/auth/apple.png

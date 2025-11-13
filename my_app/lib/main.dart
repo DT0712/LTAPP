@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/presentation/login_page.dart';
-import 'firebase_options.dart'; // Tự động sinh ra sau khi chạy lệnh flutterfire configure
+import 'features/auth/presentation/register_page.dart';
+import 'firebase_options.dart'; // File tự động sinh ra sau khi chạy lệnh flutterfire configure
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +18,9 @@ Future<void> main() async {
 
   // ✅ Đăng xuất để luôn quay lại trang đăng nhập khi khởi động lại app
   await FirebaseAuth.instance.signOut();
+  await GoogleSignIn().signOut(); // 👈 Thêm dòng này để xóa session Google
 
-  // ✅ Kiểm tra kết nối Firestore (in ra console)
+  // ✅ Kiểm tra kết nối Firestore (chỉ để debug)
   try {
     final snapshot =
         await FirebaseFirestore.instance.collection('danh_muc').get();
@@ -49,22 +52,20 @@ class MyApp extends StatelessWidget {
       ),
 
       // ✅ Theo dõi trạng thái đăng nhập Firebase
+      initialRoute: LoginPage.routeName,
+      routes: {
+        LoginPage.routeName: (_) => const LoginPage(),
+        RegisterPage.routeName: (_) => const RegisterPage(),
+        '/home': (_) => const HomePage(),
+      },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-
-          // Nếu đã đăng nhập => HomePage
-          if (snapshot.hasData) {
-            return const HomePage();
-          }
-
-          // Nếu chưa đăng nhập => LoginPage
-          return const LoginPage();
+          if (snap.hasData) return const HomePage();
+          return const LoginPage(onLoggedInRoute: '/home');
         },
       ),
     );

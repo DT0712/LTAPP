@@ -1,296 +1,425 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import '../../home/presentation/pages/home_page.dart';
-import '../../auth/data/auth_service.dart';
 import 'register_page.dart';
+import '../data/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  static const routeName = '/login';
+  const LoginPage({super.key, this.onLoggedInRoute = '/home'});
+
+  final String onLoggedInRoute;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _authService = AuthService();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl  = TextEditingController();
+  final _auth      = AuthService();
+
+  bool _obscure = true;
   bool _loading = false;
 
-  Future<void> _login() async {
-    setState(() => _loading = true);
-    try {
-      await _authService.signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message ?? 'Lỗi đăng nhập')));
-    } finally {
-      setState(() => _loading = false);
-    }
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
   }
 
-  Future<void> _loginWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+  Future<void> _doEmailLogin() async {
+    final email = _emailCtrl.text.trim();
+    final pass  = _passCtrl.text;
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+    if (email.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập email và mật khẩu')),
       );
+      return;
+    }
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+    setState(() => _loading = true);
+    try {
+      final user = await _auth.signInWithEmail(email: email, password: pass);
+      if (user != null && mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          widget.onLoggedInRoute, (r) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Đăng nhập thất bại')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Đăng nhập Google thất bại: $e")),
+        SnackBar(content: Text('Lỗi: $e')),
       );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _doGoogleLogin() async {
+    setState(() => _loading = true);
+    try {
+      final user = await _auth.signInWithGoogle();
+      if (user != null && mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          widget.onLoggedInRoute, (r) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Google Sign-In thất bại')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // ❌ Không cho Scaffold tự đẩy toàn bộ nội dung
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          /// Hình nền
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/bgLogin.jpg',
-              fit: BoxFit.cover,
+          // Ảnh nền (luôn đứng yên)
+          Image.asset('assets/images/auth/itour_login_bg.jpg', fit: BoxFit.cover),
+
+          // Lớp mờ
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                colors: [Color(0x66000000), Color(0x33000000), Color(0x66000000)],
+              ),
             ),
           ),
 
-          /// Lớp phủ mờ
-          Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.25)),
-          ),
-
-          /// Nội dung chính
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              child: LayoutBuilder(
+                builder: (context, _) {
+                  final kb = MediaQuery.of(context).viewInsets.bottom;
 
-                  /// Logo và slogan căn phải
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 28),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
-                          Text(
-                            "iTour",
-                            style: TextStyle(
-                              fontSize: 54,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontStyle: FontStyle.italic,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 6,
-                                  color: Colors.black54,
-                                  offset: Offset(2, 2),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Hãy cùng chúng tôi",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            "Khám phá",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            "VIỆT NAM",
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 80),
-
-                  /// Form đăng nhập
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 28),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        TextField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.person_outline),
-                            hintText: "Tên đăng nhập",
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.lock_outline),
-                            hintText: "Mật khẩu",
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 22),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _loading ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFAED2FF),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _loading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white)
-                                : const Text(
-                                    "Đăng nhập",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          "or",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _loginWithGoogle,
-                              icon: Image.asset(
-                                'assets/icons/google.png',
-                                height: 20,
-                              ),
-                              label: const Text("Google"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.black12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 10),
+                  return Stack(
+                    children: [
+                      // ===== HEADER: giữ nguyên vị trí, căn phải =====
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: const [
+                            SizedBox(height: 30),
+                            Text(
+                              'iTour',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 48,
+                                fontWeight: FontWeight.w900,
+                                height: 1.0,
                               ),
                             ),
-                            ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: Image.asset(
-                                'assets/icons/apple.png',
-                                height: 22,
+                            SizedBox(height: 140),
+                            Text(
+                              'Hãy cùng chúng tôi\nKhám phá',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                height: 1.4,
                               ),
-                              label: const Text("Apple"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.black12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 10),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              'VIỆT NAM',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                                fontStyle: FontStyle.italic,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const RegisterPage()),
-                            );
-                          },
-                          child: const Text(
-                            "Tạo tài khoản mới",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              decoration: TextDecoration.underline,
-                            ),
+                      ),
+
+                      // ===== FORM: chỉ khối này nhấc theo bàn phím =====
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: AnimatedPadding(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          padding: EdgeInsets.only(bottom: kb + 8),
+                          child: _LoginForm(
+                            emailCtrl: _emailCtrl,
+                            passCtrl: _passCtrl,
+                            loading: _loading,
+                            obscure: _obscure,
+                            toggleObscure: () => setState(() => _obscure = !_obscure),
+                            onEmailLogin: _doEmailLogin,
+                            onGoogleLogin: _doGoogleLogin,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LoginForm extends StatelessWidget {
+  const _LoginForm({
+    required this.emailCtrl,
+    required this.passCtrl,
+    required this.loading,
+    required this.obscure,
+    required this.toggleObscure,
+    required this.onEmailLogin,
+    required this.onGoogleLogin,
+  });
+
+  final TextEditingController emailCtrl;
+  final TextEditingController passCtrl;
+  final bool loading;
+  final bool obscure;
+  final VoidCallback toggleObscure;
+  final VoidCallback onEmailLogin;
+  final VoidCallback onGoogleLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    const purple = Color(0xFF6B4EFF);
+    const fieldBG = Colors.white;
+    const fieldBorder = Color(0xFFDDDDDD);
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.75),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _RoundedTextField(
+            controller: emailCtrl,
+            hint: 'Tên đăng nhập',
+            prefix: const Icon(Icons.person_outline),
+            background: fieldBG,
+            borderColor: fieldBorder,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 12),
+          _RoundedTextField(
+            controller: passCtrl,
+            hint: 'Mật khẩu',
+            prefix: const Icon(Icons.lock_outline),
+            background: fieldBG,
+            borderColor: fieldBorder,
+            obscure: obscure,
+            suffix: IconButton(
+              icon: Icon(obscure ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.grey[600]),
+              onPressed: toggleObscure,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Nút Đăng nhập
+          SizedBox(
+            width: double.infinity, height: 52,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: purple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: 0,
+              ),
+              onPressed: loading ? null : onEmailLogin,
+              child: loading
+                  ? const SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+                  : const Text(
+                'Đăng nhập',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // or
+          Row(
+            children: const [
+              Expanded(child: Divider()),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('or')),
+              Expanded(child: Divider()),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Google + Apple
+          Row(
+            children: [
+              Expanded(
+                child: _SocialButton(
+                  label: 'Google',
+                  asset: 'assets/images/auth/google.png',
+                  onTap: loading ? null : onGoogleLogin,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SocialButton(
+                  label: 'Apple',
+                  asset: 'assets/images/auth/apple.png',
+                  onTap: loading
+                      ? null
+                      : () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Apple Sign-In chỉ để trưng')),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: loading
+                ? null
+                : () => Navigator.of(context).pushNamed(RegisterPage.routeName),
+            child: const Text('Tạo tài khoản mới', style: TextStyle(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoundedTextField extends StatelessWidget {
+  const _RoundedTextField({
+    required this.controller,
+    required this.hint,
+    this.prefix,
+    this.suffix,
+    required this.background,
+    required this.borderColor,
+    this.obscure = false,
+    this.keyboardType,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final Widget? prefix;
+  final Widget? suffix;
+  final Color background;
+  final Color borderColor;
+  final bool obscure;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          if (prefix != null) ...[prefix!, const SizedBox(width: 8)],
+          Expanded(
+            child: TextField(
+              controller: controller,
+              obscureText: obscure,
+              keyboardType: keyboardType,
+              style: const TextStyle(color: Colors.black87),
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: hint,
+                hintStyle: const TextStyle(color: Colors.black54),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          if (suffix != null) suffix!,
+        ],
+      ),
+    );
+  }
+}
+
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({
+    required this.label,
+    required this.asset,
+    required this.onTap,
+    super.key,
+  });
+
+  final String label;
+  final String asset;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(28),
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.black.withOpacity(0.06),
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              asset, height: 20, width: 20,
+              errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 18),
+            ),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }
