@@ -25,7 +25,6 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /// --- Hàm tạo query theo từng tab ---
   Stream<QuerySnapshot> _getQuery(String tab) {
     Query query =
         HomeReferences.placesRef.where('danh_muc_id', isEqualTo: 'quan_an');
@@ -48,110 +47,184 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
             .orderBy('giam_gia', descending: true);
         break;
       case 'Gần tôi':
-        // lọc theo selectedQuan (đã xử lý ở trên)
         break;
     }
-
     return query.snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 🌈 Không dùng backgroundColor mặc định nữa, để đặt Stack nền đẹp hơn
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        title: const Text(
-          "Quán ăn",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.black),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.blueAccent,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.blueAccent,
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(text: "Gợi ý"),
-            Tab(text: "Gần tôi"),
-            Tab(text: "Giảm nhiều"),
-            Tab(text: "Mới nhất"),
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(170),
+        child: Stack(
+          children: [
+            // Nền tam giác lớn
+            ClipPath(
+              clipper: BigTriangleClipper(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFFFB300), Color(0xFFFFA000)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+            // Tam giác nhỏ
+            ClipPath(
+              clipper: SmallTriangleClipper(),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFFFE082), Color(0xFFFFB300)],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                ),
+              ),
+            ),
+            // Nội dung AppBar
+            SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new,
+                              color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Text(
+                          "Quán ăn",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.filter_list_alt,
+                              color: Colors.white),
+                          onPressed: () => _showFilterDialog(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // TabBar căn giữa
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Center(
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        labelColor: Colors.orange.shade900,
+                        unselectedLabelColor: Colors.white,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(40),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.orange.shade200.withOpacity(0.5),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        labelStyle: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                        tabs: const [
+                          Tab(text: "Gợi ý"),
+                          Tab(text: "Gần tôi"),
+                          Tab(text: "Giảm nhiều"),
+                          Tab(text: "Mới nhất"),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list_alt, color: Colors.blueAccent),
-            onPressed: () => _showFilterDialog(context),
-          )
-        ],
       ),
+      // Nội dung chính
       body: Stack(
         children: [
-          // --- 🌸 Lớp nền trang trí với các vòng tròn nhạt ---
+          // Gradient nền + hình tròn trang trí
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFF9FBFC), Color(0xFFFFFFFF)],
+                colors: [Color(0xFFFDFCFB), Color(0xFFFFFFFF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
           Positioned(
-            top: -80,
-            left: -60,
-            child: Container(
-              width: 230,
-              height: 230,
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
             top: 120,
-            right: -90,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.cyan.shade50.withOpacity(0.4),
-                shape: BoxShape.circle,
-              ),
-            ),
+            left: -40,
+            child: _buildCircle(80, Colors.orange.withOpacity(0.1)),
           ),
           Positioned(
-            bottom: -100,
-            left: -80,
-            child: Container(
-              width: 240,
-              height: 240,
-              decoration: BoxDecoration(
-                color: Colors.blue.shade100.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-            ),
+            top: 300,
+            right: -50,
+            child: _buildCircle(100, Colors.orangeAccent.withOpacity(0.1)),
           ),
-
-          // --- Nội dung TabBarView ---
-          TabBarView(
-            controller: _tabController,
-            children: [
-              _buildFoodList("Gợi ý"),
-              _buildFoodList("Gần tôi"),
-              _buildFoodList("Giảm nhiều"),
-              _buildFoodList("Mới nhất"),
-            ],
+          Positioned(
+            bottom: 80,
+            left: 50,
+            child: _buildCircle(60, Colors.amber.withOpacity(0.1)),
+          ),
+          // Nội dung TabView
+          Padding(
+            padding: const EdgeInsets.only(top: 190), // đẩy nhẹ xuống
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildFoodList("Gợi ý"),
+                _buildFoodList("Gần tôi"),
+                _buildFoodList("Giảm nhiều"),
+                _buildFoodList("Mới nhất"),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// --- Danh sách quán ăn cho từng tab ---
+  Widget _buildCircle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration:
+          BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [
+        BoxShadow(
+          color: color.withOpacity(0.2),
+          blurRadius: 8,
+          spreadRadius: 2,
+        )
+      ]),
+    );
+  }
+
   Widget _buildFoodList(String tab) {
     return StreamBuilder<QuerySnapshot>(
       stream: _getQuery(tab),
@@ -159,35 +232,18 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-
         if (snapshot.hasError) {
           return Center(
-              child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              "Lỗi tải dữ liệu: ${snapshot.error}",
-              style: const TextStyle(color: Colors.redAccent),
-            ),
-          ));
+              child: Text("Lỗi tải dữ liệu: ${snapshot.error}",
+                  style: const TextStyle(color: Colors.redAccent)));
         }
-
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          String message;
-          if (tab == "Giảm nhiều") {
-            message = "Hiện chưa có địa điểm giảm giá nào.";
-          } else {
-            message = "Không có địa điểm nào.";
-          }
-          return Center(
-            child: Text(
-              message,
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-          );
+          return const Center(
+              child: Text("Không có dữ liệu",
+                  style: TextStyle(color: Colors.grey)));
         }
 
         final foods = snapshot.data!.docs;
-
         return ListView.builder(
           padding: const EdgeInsets.all(12),
           itemCount: foods.length,
@@ -200,23 +256,19 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
     );
   }
 
-  /// --- Hộp chọn quận (lọc địa điểm) ---
   void _showFilterDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return SizedBox(
           height: 350,
           child: Column(
             children: [
               const SizedBox(height: 12),
-              const Text(
-                "Chọn quận",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
+              const Text("Chọn quận",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const Divider(),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
@@ -235,7 +287,6 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
                         final ten = HomeReferences.cleanText(
                             data['ten'] ?? docs[index].id);
                         final selected = ten == selectedQuan;
-
                         return ListTile(
                           title: Text(ten),
                           trailing: selected
@@ -257,10 +308,8 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
                   setState(() => selectedQuan = null);
                   Navigator.pop(context);
                 },
-                child: const Text(
-                  "Bỏ lọc",
-                  style: TextStyle(color: Colors.redAccent),
-                ),
+                child: const Text("Bỏ lọc",
+                    style: TextStyle(color: Colors.redAccent)),
               ),
             ],
           ),
@@ -270,6 +319,39 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
   }
 }
 
+// Các clipper giữ nguyên
+class BigTriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height - 60);
+    path.quadraticBezierTo(
+        size.width / 2, size.height, size.width, size.height - 60);
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class SmallTriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height - 80);
+    path.quadraticBezierTo(
+        size.width / 2, size.height - 10, size.width, size.height - 90);
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
 class FoodCard extends StatelessWidget {
   final Map<String, dynamic> data;
   const FoodCard({super.key, required this.data});
@@ -277,7 +359,6 @@ class FoodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final giamGia = data['giam_gia'] ?? 0;
-
     return Card(
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -346,12 +427,10 @@ class FoodCard extends StatelessWidget {
     );
   }
 
-  /// --- Hàm chọn loại ảnh phù hợp (assets hoặc fallback) ---
   Widget _buildImage(dynamic path) {
     if (path == null || path.toString().isEmpty) {
       return _buildImageFallback();
     }
-
     if (path.toString().startsWith('http')) {
       return Image.network(
         path,
@@ -361,7 +440,6 @@ class FoodCard extends StatelessWidget {
         errorBuilder: (_, __, ___) => _buildImageFallback(),
       );
     }
-
     return Image.asset(
       path,
       width: 100,

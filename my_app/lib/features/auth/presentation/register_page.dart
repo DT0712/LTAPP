@@ -20,9 +20,11 @@ class _RegisterPageState extends State<RegisterPage> {
       TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
+  String _day = "01", _month = "01", _year = "2000";
   bool _agreeTerms = false;
   bool _isLoading = false;
 
+  // --- Đăng ký tài khoản email ---
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreeTerms) {
@@ -55,20 +57,22 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  // --- Đăng ký bằng Google ---
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // hủy đăng nhập
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      await _auth.signInWithCredential(credential);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đăng nhập Google thành công!')),
@@ -89,27 +93,26 @@ class _RegisterPageState extends State<RegisterPage> {
         fit: StackFit.expand,
         children: [
           Image.asset('assets/images/bgLogin.jpg', fit: BoxFit.cover),
-          Container(color: Colors.black.withOpacity(0.4)),
+          Container(color: Colors.black.withOpacity(0.3)),
           SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
                   'iTour',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 40,
+                    fontSize: 44,
                     fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(25),
                   ),
                   child: Form(
                     key: _formKey,
@@ -118,7 +121,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         TextFormField(
                           controller: _emailController,
                           decoration: const InputDecoration(
-                            labelText: 'Tên đăng nhập (Email)',
+                            labelText: 'Tên đăng nhập',
+                            hintText: 'Nhập tên của bạn',
                             prefixIcon: Icon(Icons.person),
                           ),
                           validator: (value) =>
@@ -127,11 +131,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _passwordController,
+                          obscureText: true,
                           decoration: const InputDecoration(
                             labelText: 'Mật khẩu',
                             prefixIcon: Icon(Icons.lock),
                           ),
-                          obscureText: true,
                           validator: (value) => value!.length < 6
                               ? 'Mật khẩu ít nhất 6 ký tự'
                               : null,
@@ -139,11 +143,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _confirmPasswordController,
+                          obscureText: true,
                           decoration: const InputDecoration(
                             labelText: 'Nhập lại mật khẩu',
                             prefixIcon: Icon(Icons.lock_outline),
                           ),
-                          obscureText: true,
                           validator: (value) =>
                               value != _passwordController.text
                                   ? 'Mật khẩu không khớp'
@@ -152,23 +156,49 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _phoneController,
+                          keyboardType: TextInputType.phone,
                           decoration: const InputDecoration(
                             labelText: 'Số điện thoại',
                             prefixIcon: Icon(Icons.phone),
+                            hintText: '+84 123-456-7890',
                           ),
                         ),
+                        const SizedBox(height: 15),
+
+                        // --- Ngày sinh ---
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _dropdown(
+                                'Ngày',
+                                _day,
+                                List.generate(
+                                    31, (i) => '${i + 1}'.padLeft(2, '0')),
+                                (val) => setState(() => _day = val!)),
+                            _dropdown(
+                                'Tháng',
+                                _month,
+                                List.generate(
+                                    12, (i) => '${i + 1}'.padLeft(2, '0')),
+                                (val) => setState(() => _month = val!)),
+                            _dropdown(
+                                'Năm',
+                                _year,
+                                List.generate(40, (i) => '${1985 + i}'),
+                                (val) => setState(() => _year = val!)),
+                          ],
+                        ),
                         const SizedBox(height: 10),
+
+                        // --- Điều khoản ---
                         Row(
                           children: [
                             Checkbox(
                               value: _agreeTerms,
-                              onChanged: (value) {
-                                setState(() {
-                                  _agreeTerms = value!;
-                                });
-                              },
+                              onChanged: (v) =>
+                                  setState(() => _agreeTerms = v!),
                             ),
-                            const Expanded(
+                            Expanded(
                               child: Text.rich(
                                 TextSpan(
                                   text: 'Tôi đồng ý với ',
@@ -176,14 +206,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                     TextSpan(
                                       text: 'Điều khoản',
                                       style: TextStyle(
-                                          color: Colors.blue,
+                                          color: Colors.blue.shade700,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    TextSpan(text: ' và '),
+                                    const TextSpan(text: ' và '),
                                     TextSpan(
                                       text: 'Chính sách bảo mật',
                                       style: TextStyle(
-                                          color: Colors.blue,
+                                          color: Colors.blue.shade700,
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ],
@@ -193,13 +223,15 @@ class _RegisterPageState extends State<RegisterPage> {
                           ],
                         ),
                         const SizedBox(height: 10),
+
+                        // --- Nút đăng ký ---
                         ElevatedButton(
                           onPressed: _isLoading ? null : _register,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.lightBlueAccent,
                             minimumSize: const Size(double.infinity, 50),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                                borderRadius: BorderRadius.circular(15)),
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator(
@@ -209,8 +241,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                       fontSize: 18, color: Colors.white)),
                         ),
                         const SizedBox(height: 20),
+
                         const Text('Hoặc đăng nhập với'),
                         const SizedBox(height: 10),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -236,6 +270,32 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ],
       ),
+    );
+  }
+
+  // --- Widget dropdown ngày/tháng/năm ---
+  Widget _dropdown(String label, String value, List<String> items,
+      ValueChanged<String?> onChanged) {
+    return Column(
+      children: [
+        Text(label),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(color: Colors.grey),
+          ),
+          child: DropdownButton<String>(
+            value: value,
+            underline: const SizedBox(),
+            items: items
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: onChanged,
+          ),
+        ),
+      ],
     );
   }
 }
