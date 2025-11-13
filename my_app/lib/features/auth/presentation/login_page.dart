@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          /// Nền
+          /// Hình nền
           Positioned.fill(
             child: Image.asset(
               'assets/images/bgLogin.jpg',
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          /// Lớp phủ tối nhẹ
+          /// Lớp phủ mờ
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.25)),
           ),
@@ -90,52 +90,57 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 40),
 
-                  /// Tiêu đề
-                  const Column(
-                    children: [
-                      Text(
-                        "iTour",
-                        style: TextStyle(
-                          fontSize: 54,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontStyle: FontStyle.italic,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 6,
-                              color: Colors.black54,
-                              offset: Offset(2, 2),
+                  /// Logo và slogan căn phải
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: const [
+                          Text(
+                            "iTour",
+                            style: TextStyle(
+                              fontSize: 54,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontStyle: FontStyle.italic,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 6,
+                                  color: Colors.black54,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Hãy cùng chúng tôi",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            "Khám phá",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            "VIỆT NAM",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 6),
-                      Text(
-                        "Hãy cùng chúng tôi",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        "Khám phá",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Text(
-                        "VIỆT NAM",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
 
                   const SizedBox(height: 80),
