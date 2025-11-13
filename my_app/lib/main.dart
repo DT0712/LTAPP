@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/auth/presentation/login_page.dart';
 import 'firebase_options.dart'; // file này được tạo khi bạn chạy lệnh flutterfire configure
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Khởi tạo Firebase (rất quan trọng)
+  // ✅ Khởi tạo Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -42,7 +44,25 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: HomePage(),
+
+      // ✅ Kiểm tra trạng thái đăng nhập Firebase
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Nếu đang kiểm tra trạng thái đăng nhập
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Nếu đã đăng nhập
+          if (snapshot.hasData) {
+            return const HomePage();
+          }
+
+          // Nếu chưa đăng nhập
+          return const LoginPage();
+        },
+      ),
     );
   }
 }

@@ -9,7 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Icon Font Awesome
+  # UI Icons
   font_awesome_flutter: ^10.7.0
 
   # State management
@@ -19,21 +19,29 @@ dependencies:
   # Networking
   dio: ^5.3.0
 
-  # Firebase core (bắt buộc)
+  # Firebase core
   firebase_core: ^3.15.2
 
-  # Firebase Authentication (đăng nhập, đăng ký)
+  # Firebase Authentication (email/password + Google)
   firebase_auth: ^5.3.0
+  google_sign_in: ^6.2.1
 
   # Firestore database
   cloud_firestore: ^5.6.12
 
-  # Firebase Storage (nếu có dùng ảnh)
+  # Firebase Storage (nếu dùng ảnh)
   firebase_storage: ^12.2.0
+
+  # Flutter SVG (nếu sau này dùng icon SVG)
+  flutter_svg: ^2.0.9
+
+  # For smooth animations or blur backgrounds (tuỳ chọn)
+  flutter_blurhash: ^0.8.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
@@ -44,3 +52,5 @@ flutter:
     - assets/images/food/
     - assets/images/Banner.jpg
     - assets/images/Luutru/
+    - assets/images/bgLogin.jpg
+    - assets/icons/
