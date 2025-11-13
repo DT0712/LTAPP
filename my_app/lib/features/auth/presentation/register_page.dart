@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'login_page.dart'; // 👈 thêm dòng này để điều hướng
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -30,8 +31,8 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_agreeTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-                Text('Bạn cần đồng ý với điều khoản và chính sách bảo mật')),
+          content: Text('Bạn cần đồng ý với điều khoản và chính sách bảo mật'),
+        ),
       );
       return;
     }
@@ -42,6 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đăng ký thành công!')),
@@ -49,9 +51,23 @@ class _RegisterPageState extends State<RegisterPage> {
         Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Đăng ký thất bại')),
-      );
+      String message = e.message ?? 'Đăng ký thất bại';
+      if (e.code == 'email-already-in-use') {
+        message = 'Tài khoản đã tồn tại, vui lòng đăng nhập';
+        // 👇 Tự động điều hướng về LoginPage
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
+          await Future.delayed(const Duration(seconds: 1));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+          return;
+        }
+      }
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -71,13 +87,39 @@ class _RegisterPageState extends State<RegisterPage> {
         idToken: googleAuth.idToken,
       );
 
+      // Nếu tài khoản đã tồn tại, FirebaseAuth sẽ ném lỗi
       await _auth.signInWithCredential(credential);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng nhập Google thành công!')),
+          const SnackBar(content: Text('Đăng ký Google thành công!')),
         );
         Navigator.pop(context);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential' ||
+          e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Tài khoản Google này đã tồn tại. Vui lòng đăng nhập!'),
+          ),
+        );
+
+        // 👇 Chuyển về trang LoginPage để đăng nhập
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Lỗi: ${e.message ?? "Đăng nhập Google thất bại"}')),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +164,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           controller: _emailController,
                           decoration: const InputDecoration(
                             labelText: 'Tên đăng nhập',
-                            hintText: 'Nhập tên của bạn',
+                            hintText: 'Nhập email của bạn',
                             prefixIcon: Icon(Icons.person),
                           ),
                           validator: (value) =>
