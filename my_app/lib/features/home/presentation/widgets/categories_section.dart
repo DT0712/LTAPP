@@ -5,12 +5,12 @@ import '../../data/home_references.dart';
 
 // Import các trang đích
 import '../pages/categories/food_page.dart';
-import '../pages/categories/hotel_page.dart';
 import '../pages/categories/destination_page.dart';
 import '../pages/categories/entertainment_page.dart';
 import '../pages/categories/transport_page.dart';
 import '../pages/categories/service_page.dart';
 import '../../../accommodation/presentation/pages/hotel_list_page.dart';
+import '../../../destination/presentation/pages/destination_page.dart';
 
 class CategoriesSection extends StatelessWidget {
   const CategoriesSection({super.key});

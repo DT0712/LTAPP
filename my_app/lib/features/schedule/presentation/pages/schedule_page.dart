@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/schedule_repository.dart';
 import '../../data/schedule_model.dart';
-import '../widgets/schedule_card_widget.dart';
+import '../widgets/schedule_filters_widget.dart';
+import '../widgets/category_carousel_widget.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -13,12 +14,13 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage> {
   final ScheduleRepository _repo = ScheduleRepository();
-  final Map<String, bool> _selected = {};
   String? _selectedDistrict;
+  String? _selectedDuration;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _buildAppBar(),
       backgroundColor: const Color(0xFFF7F9FC),
       body: StreamBuilder<List<ScheduleItem>>(
         stream: _repo.streamSchedules(),
@@ -32,228 +34,98 @@ class _SchedulePageState extends State<SchedulePage> {
 
           final items = snapshot.data ?? [];
           if (items.isEmpty) {
-            return const Center(child: Text('Chưa có lịch trình'));
+            return _buildEmptyState(); // Giữ lại hàm này vì nó đơn giản
           }
 
-          // Get unique districts
+          // Lấy các bộ lọc duy nhất từ dữ liệu
           final districts = <String>{'Tất cả'};
+          final durations = <String>{'Tất cả'};
           for (final item in items) {
             if (item.district != null && item.district!.isNotEmpty) {
               districts.add(item.district!);
             }
+            if (item.duration != null && item.duration!.isNotEmpty) {
+              durations.add(item.duration!);
+            }
           }
 
-          // Filter items by selected district
-          final filteredItems = _selectedDistrict == null ||
-                  _selectedDistrict == 'Tất cả'
-              ? items
-              : items.where((i) => i.district == _selectedDistrict).toList();
+          // Lọc danh sách dựa trên các bộ lọc đã chọn
+          final filteredItems = items.where((item) {
+            final matchesDistrict = _selectedDistrict == null ||
+                _selectedDistrict == 'Tất cả' ||
+                item.district == _selectedDistrict;
+            final matchesDuration = _selectedDuration == null ||
+                _selectedDuration == 'Tất cả' ||
+                item.duration == _selectedDuration;
+            return matchesDistrict && matchesDuration;
+          }).toList();
 
-          // Group by category
+          // Nhóm theo danh mục
           final Map<String, List<ScheduleItem>> grouped = {};
           for (final it in filteredItems) {
             final cat = it.category ?? 'Không xác định';
             grouped.putIfAbsent(cat, () => []).add(it);
           }
 
-          return CustomScrollView(
-            slivers: [
-              // Banner
-              SliverAppBar(
-                expandedHeight: 160,
-                floating: false,
-                pinned: true,
-                backgroundColor: Colors.white,
-                elevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFFFA500), Color(0xFFFFD700)],
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: 40,
-                          left: 20,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'TRAVEL HCM',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Lịch trình du lịch',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          bottom: -30,
-                          right: -20,
-                          child: Opacity(
-                            opacity: 0.1,
-                            child: Icon(
-                              Icons.location_on,
-                              size: 200,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Location filter section
-              SliverToBoxAdapter(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Địa điểm (Quận)',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () =>
-                                setState(() => _selectedDistrict = null),
-                            child: const Text(
-                              'Tổ lộc',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF4A90E2),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: districts.map((district) {
-                            final isSelected = _selectedDistrict == district ||
-                                (_selectedDistrict == null &&
-                                    district == 'Tất cả');
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: GestureDetector(
-                                onTap: () => setState(
-                                    () => _selectedDistrict = district),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF4A90E2)
-                                        : Colors.white,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? const Color(0xFF4A90E2)
-                                          : Colors.grey[300]!,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    district,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.grey[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Schedule items by category
-              ...grouped.entries.map((entry) {
-                final category = entry.key;
-                final categoryItems = entry.value;
-                return SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                        child: Text(
-                          category,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      ...categoryItems.map((item) {
-                        return ScheduleCardWidget(
-                          item: item,
-                          value: _selected[item.id] ?? false,
-                          onChanged: (v) =>
-                              setState(() => _selected[item.id] = v),
-                        );
-                      }),
-                    ],
-                  ),
-                );
-              }),
-              // Bottom padding
-              const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          final selected = _selected.entries
-              .where((e) => e.value)
-              .map((e) => e.key)
-              .toList();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                selected.isEmpty
-                    ? 'Chưa chọn mục nào'
-                    : 'Đã chọn ${selected.length} mục',
-              ),
+          final sortedEntries = grouped.entries.toList();
+
+          // ListView chính
+          return ListView.custom(
+            padding: const EdgeInsets.all(0),
+            childrenDelegate: SliverChildBuilderDelegate(
+              (context, index) {
+                // Mục 0: Khu vực bộ lọc
+                if (index == 0) {
+                  return ScheduleFiltersWidget(
+                    districts: districts.toList(),
+                    durations: durations.toList(),
+                    selectedDistrict: _selectedDistrict,
+                    selectedDuration: _selectedDuration,
+                    onDistrictSelected: (val) =>
+                        setState(() => _selectedDistrict = val),
+                    onDurationSelected: (val) =>
+                        setState(() => _selectedDuration = val),
+                    onDistrictReset: () =>
+                        setState(() => _selectedDistrict = null),
+                    onDurationReset: () =>
+                        setState(() => _selectedDuration = null),
+                  );
+                }
+
+                // Các mục còn lại: Carousel danh mục
+                final categoryIndex = index - 1;
+                if (categoryIndex < sortedEntries.length) {
+                  final entry = sortedEntries[categoryIndex];
+
+                  // Sử dụng widget CategoryCarouselWidget mới
+                  return CategoryCarouselWidget(
+                    category: entry.key,
+                    items: entry.value,
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+              childCount: sortedEntries.length + 1,
             ),
           );
         },
-        icon: const Icon(Icons.check),
-        label: const Text('Xác nhận'),
-        backgroundColor: const Color(0xFF4A90E2),
+      ),
+    );
+  }
+
+  /// AppBar (Giữ lại đây vì nó là một phần của cấu trúc trang)
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.orange,
+      elevation: 0,
+      title: const Text(
+        'iTour',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
     );
   }
