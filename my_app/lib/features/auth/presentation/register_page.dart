@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterPage extends StatefulWidget {
   static const routeName = '/register';
@@ -58,28 +56,6 @@ class _RegisterPageState extends State<RegisterPage> {
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _signInWithGoogle() async {
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // user hủy
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập Google thành công!')),
-      );
-      Navigator.pop(context);
-    } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập Google thất bại')),
-      );
     }
   }
 
@@ -268,36 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ),
                                       ),
 
-                                      const SizedBox(height: 18),
-                                      const Text('Hoặc đăng nhập với'),
-                                      const SizedBox(height: 10),
-
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(
-                                              FontAwesomeIcons.google,
-                                              color: Colors.red,
-                                            ),
-                                            onPressed: _signInWithGoogle,
-                                          ),
-                                          const SizedBox(width: 20),
-                                          IconButton(
-                                            icon: const Icon(
-                                              FontAwesomeIcons.apple,
-                                              color: Colors.black,
-                                            ),
-                                            onPressed: () {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Apple Sign-In chỉ để trưng'),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                      // (ĐÃ XÓA) "Hoặc đăng nhập với" + Google/Apple
 
                                       const SizedBox(height: 12),
                                       TextButton(
