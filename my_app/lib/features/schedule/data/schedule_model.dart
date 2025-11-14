@@ -6,6 +6,10 @@ class ScheduleItem {
   final String time;
   final String place;
   final String? description;
+  final String? imageUrl;
+  final String? duration;
+  final String? district;
+  final String? category; // e.g., 'Lịch trình nhẻ buạt', 'Tất cả tất cả tất cả'
 
   ScheduleItem({
     required this.id,
@@ -13,6 +17,10 @@ class ScheduleItem {
     required this.time,
     required this.place,
     this.description,
+    this.imageUrl,
+    this.duration,
+    this.district,
+    this.category,
   });
 
   factory ScheduleItem.fromDoc(DocumentSnapshot doc) {
@@ -23,6 +31,10 @@ class ScheduleItem {
       time: data['time']?.toString() ?? '',
       place: data['place']?.toString() ?? '',
       description: data['description']?.toString(),
+      imageUrl: data['imageUrl']?.toString(),
+      duration: data['duration']?.toString(),
+      district: data['district']?.toString(),
+      category: data['category']?.toString(),
     );
   }
 }
