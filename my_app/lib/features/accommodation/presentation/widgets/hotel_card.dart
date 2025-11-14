@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../accommodation/data/hotel_model.dart';
 
 class HotelCard extends StatelessWidget {
@@ -11,9 +12,22 @@ class HotelCard extends StatelessWidget {
   final Hotel hotel;
   final VoidCallback? onBookPressed;
 
+  /// Định dạng số VND có dấu chấm + hậu tố " VND/đêm"
+  String _formatVndPerNight(dynamic value) {
+    num n;
+    if (value is num) {
+      n = value;
+    } else {
+      n = num.tryParse(value?.toString() ?? '') ?? 0;
+    }
+    final digits = NumberFormat.decimalPattern('vi_VN').format(n);
+    return '$digits VND/đêm';
+  }
+
   @override
   Widget build(BuildContext context) {
     final img = (hotel.images.isNotEmpty) ? hotel.images.first : null;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -40,6 +54,7 @@ class HotelCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
+
           // Thông tin
           Expanded(
             child: Column(
@@ -62,20 +77,22 @@ class HotelCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+
                 Row(
                   children: [
                     Icon(Icons.star, size: 16, color: Colors.amber[700]),
                     const SizedBox(width: 4),
                     Text(
-                      hotel.rating.toStringAsFixed(1),
+                      // nếu rating null thì hiển thị 0.0
+                      (hotel.rating ?? 0).toStringAsFixed(1),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const Spacer(),
                     if (hotel.priceFrom != null)
                       Text(
-                        '${hotel.priceFrom!.toString()} đ/đêm',
+                        _formatVndPerNight(hotel.priceFrom),
                         style: const TextStyle(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: Colors.black87,
                         ),
                       ),
