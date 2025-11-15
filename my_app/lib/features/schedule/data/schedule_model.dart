@@ -2,24 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ScheduleItem {
   final String id;
+  final String name;
   final String day;
-  final String time;
   final String place;
-  final String? description;
-  final String? imageUrl;
+  final String description;
+  final String district;
+  final String? image;
   final String? duration;
-  final String? district;
-  final String? category; // e.g., 'Lịch trình nhẻ buạt', 'Tất cả tất cả tất cả'
+  final String? category;
 
   ScheduleItem({
     required this.id,
     required this.day,
-    required this.time,
     required this.place,
-    this.description,
-    this.imageUrl,
+    required this.name,
+    required this.description,
+    required this.district,
+    this.image,
     this.duration,
-    this.district,
     this.category,
   });
 
@@ -27,13 +27,13 @@ class ScheduleItem {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return ScheduleItem(
       id: doc.id,
-      day: data['day']?.toString() ?? '',
-      time: data['time']?.toString() ?? '',
+      name: (data['ten'] ?? data['name'] ?? '').toString(),
+      day: (data['so_ngay'] ?? data['day'] ?? '').toString(),
+      district: (data['quan_huyen_id'] ?? data['district'] ?? '').toString(),
+      description: (data['cu_the'] ?? data['description'] ?? '').toString(),
       place: data['place']?.toString() ?? '',
-      description: data['description']?.toString(),
-      imageUrl: data['imageUrl']?.toString(),
+      image: data['image']?.toString(),
       duration: data['duration']?.toString(),
-      district: data['district']?.toString(),
       category: data['category']?.toString(),
     );
   }
