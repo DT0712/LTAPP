@@ -48,7 +48,7 @@ class _HotelListPageState extends State<HotelListPage>
   late final Animation<Offset> _slideUp;
 
   // ======= Skeleton giữ tối thiểu (toàn trang) =======
-  static const Duration _minSkeleton = Duration(milliseconds: 1200);
+  static const Duration _minSkeleton = Duration(milliseconds: 500);
 
   bool _chipsTimerDone = false;
   bool _chipsDataArrived = false;
@@ -698,7 +698,7 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     super.initState();
     _ctl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600), // chạy chậm để dễ thấy
+      duration: const Duration(milliseconds: 1000), // chạy chậm để dễ thấy
     )..repeat();
     _shift = Tween<double>(begin: -1, end: 2).animate(
       CurvedAnimation(parent: _ctl, curve: Curves.linear),
