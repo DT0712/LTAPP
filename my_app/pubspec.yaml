@@ -53,6 +53,7 @@ flutter:
     - assets/images/food/
     - assets/images/Banner.jpg
     - assets/images/Luutru/
+    - assets/images/transport/
     - assets/images/bgLogin.jpg
     - assets/icons/
     - assets/images/auth/itour_login_bg.jpg

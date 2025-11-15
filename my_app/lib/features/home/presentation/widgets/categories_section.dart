@@ -8,7 +8,7 @@ import '../pages/categories/food_page.dart';
 import '../pages/categories/hotel_page.dart';
 import '../pages/categories/destination_page.dart';
 import '../pages/categories/entertainment_page.dart';
-import '../pages/categories/transport_page.dart';
+import '../../../screens/transport/presentation/pages/transport_page.dart';
 import '../pages/categories/service_page.dart';
 import '../../../accommodation/presentation/pages/hotel_list_page.dart';
 
