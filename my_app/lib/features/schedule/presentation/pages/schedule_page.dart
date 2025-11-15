@@ -4,138 +4,132 @@ import 'package:flutter/material.dart';
 import '../../data/schedule_repository.dart';
 import '../../data/schedule_model.dart';
 
-import '../widgets/schedule_header.dart'; //
-import '../widgets/schedule_item_card.dart'; //
+import '../widgets/schedule_header.dart';
+import '../widgets/schedule_item_card.dart';
 
-// ĐÃ THÊM: Import file dialog chi tiết
 import '../widgets/schedule_detail_dialog.dart';
 
-import '../../../home/presentation/widgets/skeletons.dart'; //
+import '../../../home/presentation/widgets/skeletons.dart';
 
 class SchedulePage extends StatefulWidget {
-  const SchedulePage({super.key}); //
-  static const routeName = '/schedule'; //
+  const SchedulePage({super.key});
+  static const routeName = '/schedule';
 
   @override
-  State<SchedulePage> createState() => _SchedulePageState(); //
+  State<SchedulePage> createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final ScheduleRepository _repo = ScheduleRepository(); //
+  final ScheduleRepository _repo = ScheduleRepository();
 
-  String? _selectedDuration; //
-  String? _selectedScheduleId; //
-  String _search = ''; //
-  final _searchCtrl = TextEditingController(); //
+  String? _selectedDuration;
+  String? _selectedScheduleId;
+  String _search = '';
+  final _searchCtrl = TextEditingController();
 
-  Future<List<String>>? _durationsFuture; //
+  Future<List<String>>? _durationsFuture;
 
   @override
   void initState() {
-    super.initState(); //
-    _durationsFuture = _repo.getUniqueDurations(); //
+    super.initState();
+    _durationsFuture = _repo.getUniqueDurations();
   }
 
   @override
   void dispose() {
-    _searchCtrl.dispose(); //
-    super.dispose(); //
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const ScheduleHeader(), //
-      backgroundColor: Colors.orange, //
+      appBar: const ScheduleHeader(),
+      backgroundColor: Colors.orange,
       body: Container(
-        height: double.infinity, //
-        width: double.infinity, //
+        height: double.infinity,
+        width: double.infinity,
         decoration: const BoxDecoration(
-          color: Color(0xFFF7F9FC), //
+          color: Color(0xFFF7F9FC),
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24), //
-            topRight: Radius.circular(24), //
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
         ),
-        clipBehavior: Clip.antiAlias, //
+        clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
             FutureBuilder<List<String>>(
-              future: _durationsFuture, //
+              future: _durationsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   //
                   return Container(
-                    height: 60, //
-                    padding: const EdgeInsets.only(top: 16, bottom: 4), //
-                    child: const SkeletonChipRow(), //
+                    height: 60,
+                    padding: const EdgeInsets.only(top: 16, bottom: 4),
+                    child: const SkeletonChipRow(),
                   );
                 }
 
-                if (snapshot.hasError || //
-                    !snapshot.hasData || //
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
                     snapshot.data!.isEmpty) {
                   //
-                  return const SizedBox.shrink(); //
+                  return const SizedBox.shrink();
                 }
 
-                final durations = snapshot.data!; //
-                return _buildDurationChips(durations); //
+                final durations = snapshot.data!;
+                return _buildDurationChips(durations);
               },
             ),
             Expanded(
               child: StreamBuilder<List<ScheduleItem>>(
-                stream: _repo.streamSchedules(duration: _selectedDuration), //
+                stream: _repo.streamSchedules(duration: _selectedDuration),
                 builder: (context, snapshot) {
-                  // ...
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    //
-                    return const Center(child: CircularProgressIndicator()); //
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    //
-                    return Center(child: Text('Lỗi: ${snapshot.error}')); //
+                    return Center(child: Text('Lỗi: ${snapshot.error}'));
                   }
 
-                  final items = snapshot.data ?? []; //
+                  final items = snapshot.data ?? [];
                   if (items.isEmpty) {
                     return _buildEmptyState(
-                        message: 'Không có lịch trình phù hợp.'); //
+                        message: 'Không có lịch trình phù hợp.');
                   }
 
-                  final filteredItems = _search.isEmpty //
-                      ? items //
+                  final filteredItems = _search.isEmpty
+                      ? items
                       : items.where((item) {
-                          final name = item.name.toLowerCase(); //
-                          final desc = item.describetion.toLowerCase(); //
-                          final query = _search.toLowerCase(); //
-                          return name.contains(query) ||
-                              desc.contains(query); //
-                        }).toList(); //
+                          final name = item.name.toLowerCase();
+                          final desc = item.describetion.toLowerCase();
+                          final query = _search.toLowerCase();
+                          return name.contains(query) || desc.contains(query);
+                        }).toList();
 
                   if (filteredItems.isEmpty) {
-                    return _buildEmptyState(
-                        message: 'Không tìm thấy kết quả.'); //
+                    return _buildEmptyState(message: 'Không tìm thấy kết quả.');
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), //
-                    itemCount: filteredItems.length, //
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
-                      final item = filteredItems[index]; //
-                      final isSelected = _selectedScheduleId == item.id; //
+                      final item = filteredItems[index];
+                      final isSelected = _selectedScheduleId == item.id;
 
                       return ScheduleItemCard(
-                        item: item, //
-                        selected: isSelected, //
+                        item: item,
+                        selected: isSelected,
                         onTap: () {
-                          setState(() => _selectedScheduleId = //
-                              isSelected ? null : item.id); //
+                          setState(() => _selectedScheduleId =
+                              isSelected ? null : item.id);
                         },
 
                         // ===== ĐÃ SỬA =====
                         onDetailPressed: () {
-                          // print('View details for ${item.id}'); //
+                          // print('View details for ${item.id}');
                           // Thay thế 'print' bằng 'showDialog'
                           showDialog(
                             context: context,
@@ -164,37 +158,36 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildDurationChips(List<String> durations) {
     return Container(
       height: 60, //
-      padding: const EdgeInsets.only(top: 16, bottom: 4), //
+      padding: const EdgeInsets.only(top: 16, bottom: 4),
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16), //
-        scrollDirection: Axis.horizontal, //
-        physics: const BouncingScrollPhysics(), //
-        separatorBuilder: (_, __) => const SizedBox(width: 8), //
-        itemCount: durations.length, //
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemCount: durations.length,
         itemBuilder: (_, i) {
-          final duration = durations[i]; //
+          final duration = durations[i];
           final isSelected =
-              (_selectedDuration == null && duration == 'Tất cả') || //
-                  _selectedDuration == duration; //
+              (_selectedDuration == null && duration == 'Tất cả') ||
+                  _selectedDuration == duration;
 
           return ChoiceChip(
-            label: Text(duration), //
-            selected: isSelected, //
-            showCheckmark: false, //
+            label: Text(duration),
+            selected: isSelected,
+            showCheckmark: false,
             onSelected: (v) {
-              setState(() => _selectedDuration =
-                  (duration == 'Tất cả' ? null : duration)); //
+              setState(() =>
+                  _selectedDuration = (duration == 'Tất cả' ? null : duration));
             },
-            selectedColor: Colors.orange.shade100, //
-            backgroundColor: Colors.white, //
+            selectedColor: Colors.orange.shade100,
+            backgroundColor: Colors.white,
             labelStyle: TextStyle(
-                color:
-                    isSelected ? Colors.orange.shade900 : Colors.grey[800], //
-                fontWeight: FontWeight.w600), //
+                color: isSelected ? Colors.orange.shade900 : Colors.grey[800],
+                fontWeight: FontWeight.w600),
             shape: StadiumBorder(
                 side: BorderSide(
-                    color: isSelected ? Colors.orange : Colors.grey[300]!, //
-                    width: 1.5)), //
+                    color: isSelected ? Colors.orange : Colors.grey[300]!,
+                    width: 1.5)),
           );
         },
       ),
@@ -205,15 +198,15 @@ class _SchedulePageState extends State<SchedulePage> {
   Widget _buildEmptyState({String message = 'Chưa có lịch trình nào.'}) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, //
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.calendar_today, size: 64, color: Colors.grey), //
-          const SizedBox(height: 16), //
-          Text(message, //
+          const Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(message,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
-                  ?.copyWith(fontSize: 18)), //
+                  ?.copyWith(fontSize: 18)),
         ],
       ),
     );
