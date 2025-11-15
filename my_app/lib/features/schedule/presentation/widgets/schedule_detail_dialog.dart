@@ -64,7 +64,7 @@ class ScheduleDetailDialog extends StatelessWidget {
                   // nối bằng '\n' (xuống dòng) từ ScheduleItem.fromDoc
                   item.description,
                   style: textTheme.bodyMedium?.copyWith(
-                    height: 1.5, // Giãn cách dòng cho dễ đọc
+                    height: 2, // Giãn cách dòng cho dễ đọc
                     fontSize: 15,
                     color: Colors.black87,
                   ),

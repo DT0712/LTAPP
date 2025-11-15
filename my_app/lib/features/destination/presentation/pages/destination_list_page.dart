@@ -216,7 +216,7 @@ class _DestinationListPageState extends State<DestinationListPage>
                 showCheckmark: false,
                 onSelected: (v) =>
                     setState(() => _selectedDistrictId = v ? id : null),
-                selectedColor: const Color(0xFFFFE6B3),
+                selectedColor: const Color.fromARGB(255, 132, 195, 255),
                 backgroundColor: const Color(0xFFF2F2F2),
                 labelStyle: TextStyle(
                     color: selected ? Colors.black : Colors.grey[800],
@@ -256,7 +256,7 @@ class _DestinationListPageState extends State<DestinationListPage>
                     child: Container(
                       height: 44,
                       decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: const Color.fromARGB(255, 132, 195, 255),
                           borderRadius: BorderRadius.circular(14),
                           boxShadow: [
                             BoxShadow(
@@ -267,7 +267,7 @@ class _DestinationListPageState extends State<DestinationListPage>
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Row(
                         children: [
-                          const Icon(Icons.search, color: Colors.grey),
+                          const Icon(Icons.search, color: Colors.black),
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(

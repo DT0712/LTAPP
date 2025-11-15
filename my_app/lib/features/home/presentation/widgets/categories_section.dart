@@ -5,11 +5,11 @@ import '../../data/home_references.dart';
 
 // Import các trang đích
 import '../pages/categories/food_page.dart';
-import '../pages/categories/entertainment_page.dart';
-import '../pages/categories/transport_page.dart';
 import '../pages/categories/service_page.dart';
 import '../../../accommodation/presentation/pages/hotel_list_page.dart';
 import '../../../destination/presentation/pages/destination_list_page.dart';
+import '../../../screens/transport/presentation/pages/transport_page.dart';
+import '../../../attraction/presentation/pages/attraction_list_page.dart';
 
 class CategoriesSection extends StatelessWidget {
   const CategoriesSection({super.key});
@@ -100,7 +100,7 @@ class CategoriesSection extends StatelessWidget {
         page = const DestinationListPage();
         break;
       case 'khu_vui_choi':
-        page = const EntertainmentPage();
+        page = const AttractionListPage();
         break;
       case 'phuong_tien':
         page = const TransportPage();
