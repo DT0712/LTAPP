@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/home/presentation/pages/categories/hotel_page.dart';
+import 'features/home/presentation/pages/categories/destination_page.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/auth/presentation/register_page.dart';
 import 'firebase_options.dart'; // File tự động sinh ra sau khi chạy lệnh flutterfire configure
@@ -57,12 +59,15 @@ class MyApp extends StatelessWidget {
         LoginPage.routeName: (_) => const LoginPage(),
         RegisterPage.routeName: (_) => const RegisterPage(),
         '/home': (_) => const HomePage(),
+        HotelPage.routeName: (_) => const HotelPage(),
+        DestinationPage.routeName: (_) => const DestinationPage(),
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+                body: Center(child: CircularProgressIndicator()));
           }
           if (snap.hasData) return const HomePage();
           return const LoginPage(onLoggedInRoute: '/home');

@@ -4,6 +4,7 @@ import '../../../data/home_references.dart';
 
 class HotelPage extends StatelessWidget {
   const HotelPage({super.key});
+  static const routeName = '/hotel';
 
   @override
   Widget build(BuildContext context) {

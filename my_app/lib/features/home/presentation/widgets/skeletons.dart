@@ -129,7 +129,8 @@ class SkeletonLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SkeletonBox(width: width, height: height, borderRadius: radius, color: color);
+    return SkeletonBox(
+        width: width, height: height, borderRadius: radius, color: color);
   }
 }
 
@@ -173,6 +174,65 @@ class SkeletonChipRow extends StatelessWidget {
 /// Card skeleton mô phỏng layout HotelCard.
 class SkeletonHotelCard extends StatelessWidget {
   const SkeletonHotelCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // Ảnh
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: const SkeletonBox(width: 120, height: 90),
+            ),
+            const SizedBox(width: 12),
+
+            // Nội dung
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const <Widget>[
+                  SkeletonLine(width: 180, height: 16),
+                  SizedBox(height: 8),
+                  SkeletonLine(width: 220, height: 12),
+                  SizedBox(height: 6),
+                  SkeletonLine(width: 140, height: 12),
+                  SizedBox(height: 12),
+                  Row(
+                    children: <Widget>[
+                      // badge rating
+                      SkeletonBox(width: 64, height: 24, borderRadius: 999),
+                      Spacer(),
+                      SkeletonLine(width: 110, height: 14),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SkeletonDestinationCard extends StatelessWidget {
+  const SkeletonDestinationCard({super.key});
 
   @override
   Widget build(BuildContext context) {

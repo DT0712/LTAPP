@@ -27,7 +27,7 @@ class _HotelListPageState extends State<HotelListPage>
   late String _selectedType;
 
   String? _selectedDistrictId; // lọc quận (docId)
-  String? _selectedHotelId;    // item đang chọn để hiện nút “Đặt ngay”
+  String? _selectedHotelId; // item đang chọn để hiện nút “Đặt ngay”
 
   final _searchCtrl = TextEditingController();
   String _search = '';
@@ -71,7 +71,8 @@ class _HotelListPageState extends State<HotelListPage>
     );
     _fadeIn = CurvedAnimation(parent: _enterCtl, curve: Curves.easeOut);
     _slideUp = Tween<Offset>(begin: const Offset(0, .02), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _enterCtl, curve: Curves.easeOutCubic));
+        .animate(
+            CurvedAnimation(parent: _enterCtl, curve: Curves.easeOutCubic));
     _enterCtl.forward();
 
     // Đếm thời gian tối thiểu cho CHIPS + LIST (độc lập)
@@ -140,7 +141,8 @@ class _HotelListPageState extends State<HotelListPage>
                   Row(
                     children: [
                       const Text('Số sao tối thiểu',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
                       const Spacer(),
                       Text('${tempRating.toStringAsFixed(1)} ★'),
                     ],
@@ -159,7 +161,8 @@ class _HotelListPageState extends State<HotelListPage>
                   Row(
                     children: [
                       const Text('Khoảng giá (VND/đêm)',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
                       const Spacer(),
                       Text(
                         '${_formatVND(tempRange.start.round())} - ${_formatVND(tempRange.end.round())}',
@@ -186,7 +189,8 @@ class _HotelListPageState extends State<HotelListPage>
                         child: OutlinedButton(
                           onPressed: () => setModalState(() {
                             tempRating = 0;
-                            tempRange = const RangeValues(_kPriceMin, _kPriceMax);
+                            tempRange =
+                                const RangeValues(_kPriceMin, _kPriceMax);
                           }),
                           child: const Text('Đặt lại'),
                         ),
@@ -268,7 +272,8 @@ class _HotelListPageState extends State<HotelListPage>
                                   hintText: 'Tìm kiếm',
                                   border: InputBorder.none,
                                 ),
-                                onChanged: (v) => setState(() => _search = v.trim()),
+                                onChanged: (v) =>
+                                    setState(() => _search = v.trim()),
                               ),
                             ),
                           ],
@@ -312,7 +317,8 @@ class _HotelListPageState extends State<HotelListPage>
                     }
 
                     if (snapshot.hasError) {
-                      return Center(child: Text('Lỗi quận/huyện: ${snapshot.error}'));
+                      return Center(
+                          child: Text('Lỗi quận/huyện: ${snapshot.error}'));
                     }
 
                     final docs = snapshot.data?.docs ?? const [];
@@ -320,16 +326,14 @@ class _HotelListPageState extends State<HotelListPage>
                       return const Center(child: Text('Chưa có quận/huyện'));
                     }
 
-                    final items = docs
-                        .map((d) {
+                    final items = docs.map((d) {
                       final data = d.data();
                       return {
                         'id': d.id,
                         'ten': (data['ten'] ?? d.id).toString(),
                         'thu_tu': data['thu_tu'] ?? 9999,
                       };
-                    })
-                        .toList()
+                    }).toList()
                       ..sort((a, b) =>
                           (a['thu_tu'] as num).compareTo(b['thu_tu'] as num));
 
@@ -351,7 +355,7 @@ class _HotelListPageState extends State<HotelListPage>
                           selected: selected,
                           showCheckmark: false,
                           onSelected: (v) => setState(
-                                  () => _selectedDistrictId = v ? id : null),
+                              () => _selectedDistrictId = v ? id : null),
                           selectedColor: const Color(0xFFFFE6B3),
                           backgroundColor: const Color(0xFFF2F2F2),
                           labelStyle: TextStyle(
@@ -415,8 +419,8 @@ class _HotelListPageState extends State<HotelListPage>
                       final kw = _search.toLowerCase();
                       data = data
                           .where((h) =>
-                      h.name.toLowerCase().contains(kw) ||
-                          h.address.toLowerCase().contains(kw))
+                              h.name.toLowerCase().contains(kw) ||
+                              h.address.toLowerCase().contains(kw))
                           .toList();
                     }
                     // Lọc theo sao tối thiểu
@@ -424,20 +428,19 @@ class _HotelListPageState extends State<HotelListPage>
                         .where((h) => (h.rating ?? 0).toDouble() >= _minRating)
                         .toList();
                     // Lọc theo khoảng giá
-                    data = data
-                        .where((h) {
+                    data = data.where((h) {
                       final num? raw = h.priceFrom;
                       final p = raw == null
                           ? 0.0
                           : (raw is num
-                          ? raw.toDouble()
-                          : double.tryParse(raw.toString()) ?? 0.0);
+                              ? raw.toDouble()
+                              : double.tryParse(raw.toString()) ?? 0.0);
                       return p >= _priceRange.start && p <= _priceRange.end;
-                    })
-                        .toList();
+                    }).toList();
 
                     if (data.isEmpty) {
-                      return const Center(child: Text('Không có địa điểm phù hợp.'));
+                      return const Center(
+                          child: Text('Không có địa điểm phù hợp.'));
                     }
 
                     return ListView.separated(
@@ -457,7 +460,7 @@ class _HotelListPageState extends State<HotelListPage>
                             selected: isSelected,
                             onTap: () {
                               setState(() =>
-                              _selectedHotelId = isSelected ? null : h.id);
+                                  _selectedHotelId = isSelected ? null : h.id);
                             },
                             onBookPressed: () {
                               // TODO: điều hướng sang màn đặt phòng/chi tiết với h.id
@@ -482,55 +485,55 @@ class _HotelListPageState extends State<HotelListPage>
         duration: const Duration(milliseconds: 280),
         child: _showPageSkeleton
             ? Container(
-          key: const ValueKey('page_skeleton'),
-          color: Colors.white, // nền trắng như trang
-          child: Column(
-            children: [
-              // Header skeleton
-              _SkeletonHeader(height: 150),
-              const SizedBox(height: 12),
-
-              // Search skeleton
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
+                key: const ValueKey('page_skeleton'),
+                color: Colors.white, // nền trắng như trang
+                child: Column(
                   children: [
-                    // ô tìm kiếm
-                    Expanded(
-                      child: _SkeletonBox(height: 44, borderRadius: 14),
+                    // Header skeleton
+                    _SkeletonHeader(height: 150),
+                    const SizedBox(height: 12),
+
+                    // Search skeleton
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          // ô tìm kiếm
+                          Expanded(
+                            child: _SkeletonBox(height: 44, borderRadius: 14),
+                          ),
+                          const SizedBox(width: 8),
+                          // nút filter
+                          _SkeletonBox(width: 44, height: 44, borderRadius: 12),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    // nút filter
-                    _SkeletonBox(width: 44, height: 44, borderRadius: 12),
+                    const SizedBox(height: 10),
+
+                    // Chip row skeleton
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: SkeletonChipRow(),
+                    ),
+
+                    // Divider
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: _SkeletonBox(height: 3, borderRadius: 2),
+                    ),
+
+                    // Danh sách skeleton
+                    Expanded(
+                      child: ListView.builder(
+                        key: const PageStorageKey('page_skeleton_list'),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        itemCount: 6,
+                        itemBuilder: (_, __) => const SkeletonHotelCard(),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 10),
-
-              // Chip row skeleton
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: SkeletonChipRow(),
-              ),
-
-              // Divider
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: _SkeletonBox(height: 3, borderRadius: 2),
-              ),
-
-              // Danh sách skeleton
-              Expanded(
-                child: ListView.builder(
-                  key: const PageStorageKey('page_skeleton_list'),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                  itemCount: 6,
-                  itemBuilder: (_, __) => const SkeletonHotelCard(),
-                ),
-              ),
-            ],
-          ),
-        )
+              )
             : const SizedBox.shrink(),
       ),
     );
@@ -539,8 +542,8 @@ class _HotelListPageState extends State<HotelListPage>
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          content,     // nội dung thật
-          overlay,     // skeleton phủ toàn trang khi cần
+          content, // nội dung thật
+          overlay, // skeleton phủ toàn trang khi cần
         ],
       ),
     );
@@ -643,9 +646,9 @@ class _HeaderWithImage extends StatelessWidget {
                       icon: const Icon(Icons.keyboard_arrow_down),
                       items: types
                           .map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e),
-                      ))
+                                value: e,
+                                child: Text(e),
+                              ))
                           .toList(),
                       onChanged: (v) {
                         if (v != null) onTypeChanged(v);
