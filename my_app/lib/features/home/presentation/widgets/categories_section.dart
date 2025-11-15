@@ -10,7 +10,8 @@ import '../pages/categories/entertainment_page.dart';
 import '../pages/categories/transport_page.dart';
 import '../pages/categories/service_page.dart';
 import '../../../accommodation/presentation/pages/hotel_list_page.dart';
-import '../../../destination/presentation/pages/destination_page.dart';
+import 'package:my_app/features/destination/presentation/pages/destination_page.dart'
+    as destination_main;
 
 class CategoriesSection extends StatelessWidget {
   const CategoriesSection({super.key});

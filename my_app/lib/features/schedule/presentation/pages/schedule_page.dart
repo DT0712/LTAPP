@@ -41,8 +41,8 @@ class _SchedulePageState extends State<SchedulePage> {
           final districts = <String>{'Tất cả'};
           final durations = <String>{'Tất cả'};
           for (final item in items) {
-            if (item.district != null && item.district!.isNotEmpty) {
-              districts.add(item.district!);
+            if (item.district.isNotEmpty) {
+              districts.add(item.district);
             }
             if (item.duration != null && item.duration!.isNotEmpty) {
               durations.add(item.duration!);
@@ -126,6 +126,23 @@ class _SchedulePageState extends State<SchedulePage> {
           fontWeight: FontWeight.bold,
           fontSize: 18,
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+          SizedBox(height: 16),
+          Text('No schedules yet',
+              style: Theme.of(context).textTheme.titleLarge),
+          SizedBox(height: 8),
+          Text('Create your first schedule',
+              style: Theme.of(context).textTheme.bodyMedium),
+        ],
       ),
     );
   }
