@@ -1,6 +1,5 @@
 // lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../widgets/home_app_bar.dart';
 import '../widgets/filter_panel.dart';
@@ -8,6 +7,7 @@ import '../widgets/home_banner.dart';
 import '../widgets/categories_section.dart';
 import '../widgets/suggested_places_section.dart';
 import '../../../schedule/presentation/pages/schedule_page.dart';
+import '../../../chat/chat_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,61 +20,78 @@ class _HomePageState extends State<HomePage> {
   static const Color primaryBlue = Color(0xFFAED2FF);
   static const Color backgroundColor = Color(0xFFF7F9FC);
 
-  int _currentIndex = 2;
-  String? selectedQuan;
-  bool showFilterPanel = false;
+  // --- State chính cho điều hướng ---
+  int _pageIndex = 2;
+  List<int> _iconSlots = [0, 1, 2, 3, 4];
+  final List<Widget> _pages = [
+    //Lịch
+    const SchedulePage(),
+    //Chat
+    const ChatPage(),
+    //Trang chủ
+    StatefulBuilder(
+      builder: (BuildContext context, StateSetter setHomeState) {
+        String? selectedQuan;
+        bool showFilterPanel = false;
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              HomeAppBar(
+                onFilterTap: () =>
+                    setHomeState(() => showFilterPanel = !showFilterPanel),
+              ),
+              if (showFilterPanel)
+                FilterPanel(
+                  selectedQuan: selectedQuan,
+                  onQuanSelected: (quan) => setHomeState(() {
+                    selectedQuan = quan;
+                    showFilterPanel = false;
+                  }),
+                  onClear: () => setHomeState(() {
+                    selectedQuan = null;
+                    showFilterPanel = false;
+                  }),
+                ),
+              const HomeBanner(),
+              const CategoriesSection(),
+              SuggestedPlacesSection(selectedQuan: selectedQuan),
+            ],
+          ),
+        );
+      },
+    ),
+    const Center(child: Text('Notifications Page')),
+    const Center(child: Text('Profile Page')),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    // Xác định icon nào đang ở vị trí FAB
+    int fabIconIndex = _iconSlots[2];
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: backgroundColor,
       body: SafeArea(
         bottom: false,
         child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            const SchedulePage(),
-            const Center(child: Text('Chat Page')),
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  HomeAppBar(
-                    onFilterTap: () =>
-                        setState(() => showFilterPanel = !showFilterPanel),
-                  ),
-                  if (showFilterPanel)
-                    FilterPanel(
-                      selectedQuan: selectedQuan,
-                      onQuanSelected: (quan) => setState(() {
-                        selectedQuan = quan;
-                        showFilterPanel = false;
-                      }),
-                      onClear: () => setState(() {
-                        selectedQuan = null;
-                        showFilterPanel = false;
-                      }),
-                    ),
-                  const HomeBanner(),
-                  const CategoriesSection(), // ← XÓA `const` → vì không có const constructor
-                  SuggestedPlacesSection(selectedQuan: selectedQuan),
-                ],
-              ),
-            ),
-            const Center(child: Text('Notifications Page')),
-            const Center(child: Text('Profile Page')),
-          ],
+          index: _pageIndex, // Hiển thị trang theo _pageIndex
+          children: _pages,
         ),
       ),
       //FloatingActionButton
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          // Khi nhấn FAB, chỉ cần đảm bảo trang đúng được hiển thị
+          setState(() {
+            _pageIndex = fabIconIndex;
+          });
+        },
         backgroundColor: primaryBlue,
         elevation: 8.0,
         shape: const CircleBorder(),
         child: Icon(
-          _navIcons[_currentIndex]
-              ['filled'], // Hiển thị icon của trang hiện tại
+          _navIcons[fabIconIndex]['filled'], // Hiển thị icon ở slot 2
           color: Colors.black,
           size: 28,
         ),
@@ -95,13 +112,23 @@ class _HomePageState extends State<HomePage> {
               // 2 item bên trái
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: _buildSideItems(left: true),
+                children: [
+                  // Xây dựng icon cho slot 0
+                  _buildBarIcon(slotIndex: 0),
+                  // Xây dựng icon cho slot 1
+                  _buildBarIcon(slotIndex: 1),
+                ],
               ),
               const SizedBox(width: 56),
               // 2 item bên phải
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: _buildSideItems(left: false),
+                children: [
+                  // Xây dựng icon cho slot 3
+                  _buildBarIcon(slotIndex: 3),
+                  // Xây dựng icon cho slot 4
+                  _buildBarIcon(slotIndex: 4),
+                ],
               ),
             ],
           ),
@@ -124,28 +151,40 @@ class _HomePageState extends State<HomePage> {
         },
         {'filled': Icons.person, 'outlined': Icons.person_outline},
       ];
-  // Build the left or right side items (two icons each)
-  List<Widget> _buildSideItems({required bool left}) {
-    // all indices
-    final all = [0, 1, 2, 3, 4];
-    // remove the selected index
-    final others = all.where((i) => i != _currentIndex).toList();
-    // left takes first 2, right takes last 2
-    final leftItems = others.take(2).toList();
-    final rightItems = others.skip(2).toList();
-    final pick = left ? leftItems : rightItems;
-    return pick.map((idx) {
-      final icons = _navIcons[idx];
-      final filled = icons['filled']!;
-      final outlined = icons['outlined']!;
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: IconButton(
-          icon: Icon(_currentIndex == idx ? filled : outlined,
-              color: Colors.white),
-          onPressed: () => setState(() => _currentIndex = idx),
+
+  // Hàm build icon và xử lý SWAP (KHÔNG ĐỔI)
+  Widget _buildBarIcon({required int slotIndex}) {
+    //Lấy icon index (0-4) từ slot (0, 1, 3, 4)
+    int iconIndex = _iconSlots[slotIndex];
+    //Icon này có đang được chọn không (so sánh với trang đang hiển thị)
+    bool isSelected = (_pageIndex == iconIndex);
+    //Lấy icon filled/outlined
+    final icons = _navIcons[iconIndex];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      child: IconButton(
+        icon: Icon(
+          isSelected ? icons['filled']! : icons['outlined']!,
+          color: Colors.white,
         ),
-      );
-    }).toList();
+        onPressed: () {
+          //logic "SWAP"
+          setState(() {
+            // Lấy icon index hiện tại của FAB
+            int currentFabIconIndex = _iconSlots[2];
+
+            //Cập nhật trang sẽ hiển thị
+            _pageIndex = iconIndex;
+
+            //Đưa icon của FAB (cũ) vào slot vừa nhấn
+            _iconSlots[slotIndex] = currentFabIconIndex;
+
+            //Đưa icon vừa nhấn (mới) vào slot FAB
+            _iconSlots[2] = iconIndex;
+          });
+        },
+      ),
+    );
   }
 }
