@@ -1,5 +1,5 @@
-// lib/features/chat/presentation/pages/chat_page.dart
 import 'package:flutter/material.dart';
+import 'chat_detail_page.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
@@ -9,8 +9,7 @@ class ChatPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
-        backgroundColor:
-            const Color.fromARGB(255, 48, 129, 250), // Màu xanh tím
+        backgroundColor: const Color.fromARGB(255, 48, 129, 250),
         automaticallyImplyLeading: false,
         title: const Text(
           'Tin nhắn',
@@ -62,7 +61,7 @@ class ChatPage extends StatelessWidget {
                   message: 'Cảm ơn quý khách đã sử dụng dịch vụ bên mình',
                   time: '2 months',
                 ),
-                // Bạn có thể thêm các item khác tại đây
+                // Thêm các mục chat khác ở đây
               ],
             ),
           ),
@@ -88,73 +87,89 @@ class ChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Avatar
-          CircleAvatar(
-            radius: 30, // Kích thước avatar
-            backgroundImage: AssetImage(avatarAsset),
-            backgroundColor: Colors.grey[200],
-          ),
-          const SizedBox(width: 16),
-          // Thông tin (Tên, Time, Message, Share)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                //Tên + Time
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                    ),
-                    Text(
-                      time,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-
-                //Message + Share Icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        message,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[700],
-                              fontSize: 14,
-                            ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.share_outlined,
-                      color: Colors.grey[500],
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        //ĐIỀU HƯỚNG
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatDetailPage(
+              name: name, // Truyền tên
+              avatarAsset: avatarAsset, // Truyền ảnh
             ),
           ),
-        ],
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 30, // Kích thước avatar
+              backgroundImage: AssetImage(avatarAsset),
+              backgroundColor: Colors.grey[200],
+            ),
+            const SizedBox(width: 16),
+            // Thông tin
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //Tên + Time
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                      ),
+                      Text(
+                        time,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  //Message + Share Icon
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          message,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey[700],
+                                    fontSize: 14,
+                                  ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.share_outlined,
+                        color: Colors.grey[500],
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

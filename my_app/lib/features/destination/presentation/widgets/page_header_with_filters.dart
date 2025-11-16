@@ -1,4 +1,3 @@
-// lib/features/shared/widgets/page_header_with_filters.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,7 +21,7 @@ class PageHeaderWithFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
 
-    // SỬA ĐỔI: Xác định góc bo
+    //Xác định góc bo
     const bottomRadius = Radius.circular(20.0);
     const borderRadius = BorderRadius.only(
       bottomLeft: bottomRadius,
@@ -36,7 +35,6 @@ class PageHeaderWithFilters extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.only(top: topPadding),
         decoration: BoxDecoration(
-          // SỬA ĐỔI: Thêm borderRadius vào đây
           borderRadius: borderRadius,
           image: DecorationImage(
             image: AssetImage(imagePath),
@@ -47,15 +45,14 @@ class PageHeaderWithFilters extends StatelessWidget {
             ),
           ),
         ),
-        // SỬA ĐỔI: Thêm ClipRRect để bo tròn nội dung bên trong (Stack)
         child: ClipRRect(
           borderRadius: borderRadius,
           child: Stack(
             children: [
               // Nút Back
               Positioned(
-                top: 55, // Dịch xuống một chút để cân đối
-                left: 10, // Dịch vào một chút
+                top: 55,
+                left: 10,
                 child: Container(
                   width: 44, // Kích thước vòng tròn
                   height: 44, // Kích thước vòng tròn
@@ -73,8 +70,7 @@ class PageHeaderWithFilters extends StatelessWidget {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back,
-                        color: Colors.black87,
-                        size: 24), // Đổi màu icon thành đen
+                        color: Colors.black87, size: 24), //Màu icon
                     onPressed: onBack,
                     tooltip: 'Quay lại',
                   ),
@@ -83,9 +79,9 @@ class PageHeaderWithFilters extends StatelessWidget {
 
               // Tiêu đề
               Positioned(
-                top: 65, // Điều chỉnh vị trí tiêu đề để không bị che
-                left: 65, // Dịch vào sau nút back
-                right: 20, // Dịch vào để đối xứng
+                top: 65,
+                left: 65,
+                right: 20,
                 child: Text(
                   title,
                   style: const TextStyle(

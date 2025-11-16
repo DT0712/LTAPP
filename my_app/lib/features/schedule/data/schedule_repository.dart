@@ -24,7 +24,7 @@ class ScheduleRepository {
     });
   }
 
-  // SỬA ĐỔI: Thêm hàm mới để lấy 'thoi_gian' duy nhất
+  //Thêm hàm mới để lấy 'thoi_gian' duy nhất
   Future<List<String>> getUniqueDurations() async {
     try {
       // 1. Truy vấn collection 'lich_trinh' một lần

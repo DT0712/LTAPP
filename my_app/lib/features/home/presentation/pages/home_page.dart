@@ -1,4 +1,3 @@
-// lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
 
 import '../widgets/home_app_bar.dart';
@@ -8,6 +7,7 @@ import '../widgets/categories_section.dart';
 import '../widgets/suggested_places_section.dart';
 import '../../../schedule/presentation/pages/schedule_page.dart';
 import '../../../chat/chat_page.dart';
+import '../../../notification/notification_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,11 +24,13 @@ class _HomePageState extends State<HomePage> {
   int _pageIndex = 2;
   List<int> _iconSlots = [0, 1, 2, 3, 4];
   final List<Widget> _pages = [
-    //Lịch
+    //Lịch (Index 0)
     const SchedulePage(),
-    //Chat
+
+    //Chat (Index 1)
     const ChatPage(),
-    //Trang chủ
+
+    //Trang chủ (Index 2)
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setHomeState) {
         String? selectedQuan;
@@ -60,7 +62,11 @@ class _HomePageState extends State<HomePage> {
         );
       },
     ),
-    const Center(child: Text('Notifications Page')),
+
+    //Thông báo (Index 3)
+    const NotificationPage(),
+
+    // Profile (Index 4)
     const Center(child: Text('Profile Page')),
   ];
 
@@ -146,13 +152,13 @@ class _HomePageState extends State<HomePage> {
         {'filled': Icons.chat_bubble, 'outlined': Icons.chat_bubble_outline},
         {'filled': Icons.home, 'outlined': Icons.home_outlined},
         {
-          'filled': Icons.notifications,
+          'filled': Icons.notifications, // <-- Icon cho trang thông báo
           'outlined': Icons.notifications_outlined
         },
         {'filled': Icons.person, 'outlined': Icons.person_outline},
       ];
 
-  // Hàm build icon và xử lý SWAP (KHÔNG ĐỔI)
+  // Hàm build icon và xử lý SWAP
   Widget _buildBarIcon({required int slotIndex}) {
     //Lấy icon index (0-4) từ slot (0, 1, 3, 4)
     int iconIndex = _iconSlots[slotIndex];

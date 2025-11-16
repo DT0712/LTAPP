@@ -1,5 +1,3 @@
-// lib/features/destination/presentation/pages/destination_list_page.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../../home/data/home_references.dart';
@@ -25,13 +23,11 @@ class _DestinationListPageState extends State<DestinationListPage>
   // ======= STATE CƠ BẢN =======
   String? _selectedDistrictId;
 
-  // SỬA ĐỔI: Thêm state để theo dõi ID của thẻ đang được chọn
   String? _selectedDestinationId;
 
   final _searchCtrl = TextEditingController();
   String _search = '';
 
-  // (Các state khác giữ nguyên...)
   final ScrollController _districtCtrl = ScrollController();
   final ScrollController _destinationListCtrl = ScrollController();
   double _minRating = 0;
@@ -78,7 +74,7 @@ class _DestinationListPageState extends State<DestinationListPage>
     super.dispose();
   }
 
-  // (Hàm _openFilterSheet giữ nguyên...)
+  //Hàm _openFilterSheet
   Future<void> _openFilterSheet() async {
     var tempRating = _minRating;
     await showModalBottomSheet(
@@ -166,7 +162,7 @@ class _DestinationListPageState extends State<DestinationListPage>
   Widget build(BuildContext context) {
     const dividerColor = Color(0xFFB5E100);
 
-    // (Widget districtChips giữ nguyên...)
+    //Widget districtChips
     final districtChips = SizedBox(
       height: 40,
       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -234,7 +230,7 @@ class _DestinationListPageState extends State<DestinationListPage>
       ),
     );
 
-    // (Biến 'content' và phần 'PageHeaderWithFilters', 'Search' giữ nguyên)
+    //Biến 'content' và phần 'PageHeaderWithFilters', 'Search'
     final content = FadeTransition(
       opacity: _fadeIn,
       child: SlideTransition(
@@ -315,7 +311,7 @@ class _DestinationListPageState extends State<DestinationListPage>
                   district: _selectedDistrictId,
                 ),
                 builder: (context, snapshot) {
-                  // (Phần logic skeleton và lọc data giữ nguyên)
+                  //Phần logic skeleton và lọc data
                   if (snapshot.hasData && !_listDataArrived) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) setState(() => _listDataArrived = true);
@@ -350,8 +346,6 @@ class _DestinationListPageState extends State<DestinationListPage>
                         child: Text('Không có địa điểm phù hợp.'));
                   }
 
-                  // SỬA ĐỔI: ListView.builder -> ListView.separated
-                  // và xóa 'separatorBuilder' bên trong Card
                   return ListView.builder(
                     key: const PageStorageKey('destination_list'),
                     controller: _destinationListCtrl,
@@ -366,7 +360,6 @@ class _DestinationListPageState extends State<DestinationListPage>
                         key: ValueKey(h.id),
                         child: DestinationCard(
                           destination: h,
-                          // SỬA ĐỔI: Thêm 3 thuộc tính này
                           selected: isSelected,
                           onTap: () {
                             setState(() => _selectedDestinationId =
@@ -388,7 +381,7 @@ class _DestinationListPageState extends State<DestinationListPage>
       ),
     );
 
-    // (Phần overlay và Scaffold giữ nguyên)
+    //Overlay và Scaffold
     final overlay = IgnorePointer(
       ignoring: !_showPageSkeleton,
       child: AnimatedSwitcher(
@@ -449,7 +442,7 @@ class _DestinationListPageState extends State<DestinationListPage>
   }
 }
 
-// (Lớp _SkeletonBox giữ nguyên)
+//_SkeletonBox
 class _SkeletonBox extends StatefulWidget {
   const _SkeletonBox({this.width, this.height = 16, this.borderRadius = 12});
   final double? width;

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'destination_model.dart'; // Đảm bảo import đúng mô hình
+import 'destination_model.dart';
 
 class DestinationRepository {
   final FirebaseFirestore _db;
