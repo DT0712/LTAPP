@@ -8,6 +8,8 @@ import '../widgets/suggested_places_section.dart';
 import '../../../schedule/presentation/pages/schedule_page.dart';
 import '../../../chat/chat_page.dart';
 import '../../../notification/notification_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -68,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     const NotificationPage(),
 
     // Profile (Index 4)
-    const Center(child: Text('Profile Page')),
+    const ProfilePage(),
   ];
 
   @override

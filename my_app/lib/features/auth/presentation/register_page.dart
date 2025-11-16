@@ -68,7 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
         fit: StackFit.expand,
         children: [
           // Ảnh nền
-          Image.asset('assets/images/bgLogin.jpg', fit: BoxFit.cover),
+          Image.asset('assets/images/auth/itour_login_bg.jpg', fit: BoxFit.cover),
           // Lớp phủ mờ
           Container(color: Colors.black.withOpacity(0.4)),
 

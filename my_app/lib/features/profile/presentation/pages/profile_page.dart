@@ -11,7 +11,6 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool _notifOn = true;
   String _language = 'Tiếng Việt';
-  String _theme = 'Sáng';
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +27,11 @@ class _ProfilePageState extends State<ProfilePage> {
               return _NotSignedIn(
                 onSignInHint: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Hãy quay lại trang đăng nhập để đăng nhập Google.')),
+                    const SnackBar(
+                      content: Text(
+                        'Hãy quay lại trang đăng nhập để đăng nhập Google.',
+                      ),
+                    ),
                   );
                 },
               );
@@ -51,14 +54,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 8),
-                      // ===== Header =====
+                      // ===== Header (KHÔNG có mũi tên back) =====
                       _HeaderCard(
                         name: name,
                         email: email,
                         photoUrl: photoUrl,
                         onEdit: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Tính năng chỉnh sửa hồ sơ sẽ sớm có 😄')),
+                            const SnackBar(
+                              content: Text(
+                                'Tính năng chỉnh sửa hồ sơ sẽ sớm có 😄',
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -74,7 +81,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Mở màn chỉnh sửa hồ sơ…')),
+                                const SnackBar(
+                                  content: Text('Mở màn chỉnh sửa hồ sơ…'),
+                                ),
                               );
                             },
                           ),
@@ -87,7 +96,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           _SettingTile(
                             icon: Icons.language_outlined,
                             title: 'Ngôn ngữ',
-                            trailing: Text(_language, style: _trailingStyle),
+                            trailing: Text(
+                              _language,
+                              style: _trailingStyle,
+                            ),
                             onTap: () async {
                               final val = await _pickOption(
                                 context,
@@ -101,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
 
-                      // ===== Group 2 =====
+                      // ===== Group 2 (đã gỡ mục Chủ đề) =====
                       _SectionCard(
                         children: [
                           _SettingTile(
@@ -110,22 +122,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Mở cài đặt bảo mật…')),
+                                const SnackBar(
+                                  content: Text('Mở cài đặt bảo mật…'),
+                                ),
                               );
-                            },
-                          ),
-                          _SettingTile(
-                            icon: Icons.color_lens_outlined,
-                            title: 'Chủ đề',
-                            trailing: Text(_theme, style: _trailingStyle),
-                            onTap: () async {
-                              final val = await _pickOption(
-                                context,
-                                title: 'Chọn chủ đề',
-                                options: const ['Sáng', 'Tối', 'Theo hệ thống'],
-                                current: _theme,
-                              );
-                              if (val != null) setState(() => _theme = val);
                             },
                           ),
                         ],
@@ -157,7 +157,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       // Thông tin tài khoản hiện tại
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: _AccountInfo(email: email, phone: phone, providerId: user.providerData.isNotEmpty ? user.providerData.first.providerId : ''),
+                        child: _AccountInfo(
+                          email: email,
+                          phone: phone,
+                          providerId: user.providerData.isNotEmpty
+                              ? user.providerData.first.providerId
+                              : '',
+                        ),
                       ),
 
                       const SizedBox(height: 16),
@@ -211,15 +217,28 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(999))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
             const SizedBox(height: 12),
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
-            ...options.map((o) => ListTile(
-              title: Text(o),
-              trailing: o == current ? const Icon(Icons.check, color: Colors.blue) : null,
-              onTap: () => Navigator.pop(context, o),
-            )),
+            ...options.map(
+                  (o) => ListTile(
+                title: Text(o),
+                trailing:
+                o == current ? const Icon(Icons.check, color: Colors.blue) : null,
+                onTap: () => Navigator.pop(context, o),
+              ),
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -265,12 +284,9 @@ class _HeaderCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
+              // HÀNG TRÊN: chỉ có nút edit bên phải (đÃ bỏ nút back)
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                  ),
                   const Spacer(),
                   IconButton(
                     onPressed: onEdit,
@@ -292,7 +308,8 @@ class _HeaderCard extends StatelessWidget {
                             ? NetworkImage(photoUrl!)
                             : null,
                         child: (photoUrl == null || photoUrl!.isEmpty)
-                            ? const Icon(Icons.person, size: 42, color: Colors.blueGrey)
+                            ? const Icon(Icons.person,
+                            size: 42, color: Colors.blueGrey)
                             : null,
                       ),
                       Positioned(
@@ -317,7 +334,9 @@ class _HeaderCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                        Text(name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w800)),
                         const SizedBox(height: 4),
                         Text(
                           email,
