@@ -21,8 +21,9 @@ class _HomePageState extends State<HomePage> {
   static const Color backgroundColor = Color(0xFFF7F9FC);
 
   // --- State chính cho điều hướng ---
-  int _pageIndex = 2;
-  List<int> _iconSlots = [0, 1, 2, 3, 4];
+  int _pageIndex = 2; // Bắt đầu ở trang chủ (index 2)
+
+  // Danh sách các trang, không thay đổi
   final List<Widget> _pages = [
     //Lịch (Index 0)
     const SchedulePage(),
@@ -72,8 +73,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Xác định icon nào đang ở vị trí FAB
-    int fabIconIndex = _iconSlots[2];
+    // Không cần 'fabIconIndex' hay '_iconSlots' nữa
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -85,19 +85,19 @@ class _HomePageState extends State<HomePage> {
           children: _pages,
         ),
       ),
-      //FloatingActionButton
+      //FloatingActionButton (Luôn là Trang chủ)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Khi nhấn FAB, chỉ cần đảm bảo trang đúng được hiển thị
+          // Khi nhấn FAB, luôn đặt _pageIndex = 2
           setState(() {
-            _pageIndex = fabIconIndex;
+            _pageIndex = 2;
           });
         },
         backgroundColor: primaryBlue,
         elevation: 8.0,
         shape: const CircleBorder(),
         child: Icon(
-          _navIcons[fabIconIndex]['filled'], // Hiển thị icon ở slot 2
+          _navIcons[2]['filled'], // Luôn hiển thị icon 'home' (index 2)
           color: Colors.black,
           size: 28,
         ),
@@ -115,25 +115,25 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 2 item bên trái
+              // 2 item bên trái (Cố định)
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  // Xây dựng icon cho slot 0
-                  _buildBarIcon(slotIndex: 0),
-                  // Xây dựng icon cho slot 1
-                  _buildBarIcon(slotIndex: 1),
+                  //icon cho Lịch (index 0)
+                  _buildBarIcon(iconIndex: 0),
+                  //icon cho Chat (index 1)
+                  _buildBarIcon(iconIndex: 1),
                 ],
               ),
-              const SizedBox(width: 56),
-              // 2 item bên phải
+              const SizedBox(width: 56), // Khoảng trống cho FAB
+              // 2 item bên phải (Cố định)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Xây dựng icon cho slot 3
-                  _buildBarIcon(slotIndex: 3),
-                  // Xây dựng icon cho slot 4
-                  _buildBarIcon(slotIndex: 4),
+                  //icon cho Thông báo (index 3)
+                  _buildBarIcon(iconIndex: 3),
+                  //icon cho Profile (index 4)
+                  _buildBarIcon(iconIndex: 4),
                 ],
               ),
             ],
@@ -152,19 +152,15 @@ class _HomePageState extends State<HomePage> {
         {'filled': Icons.chat_bubble, 'outlined': Icons.chat_bubble_outline},
         {'filled': Icons.home, 'outlined': Icons.home_outlined},
         {
-          'filled': Icons.notifications, // <-- Icon cho trang thông báo
+          'filled': Icons.notifications,
           'outlined': Icons.notifications_outlined
         },
         {'filled': Icons.person, 'outlined': Icons.person_outline},
       ];
 
-  // Hàm build icon và xử lý SWAP
-  Widget _buildBarIcon({required int slotIndex}) {
-    //Lấy icon index (0-4) từ slot (0, 1, 3, 4)
-    int iconIndex = _iconSlots[slotIndex];
-    //Icon này có đang được chọn không (so sánh với trang đang hiển thị)
+  // Hàm build icon
+  Widget _buildBarIcon({required int iconIndex}) {
     bool isSelected = (_pageIndex == iconIndex);
-    //Lấy icon filled/outlined
     final icons = _navIcons[iconIndex];
 
     return Padding(
@@ -175,19 +171,8 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
         ),
         onPressed: () {
-          //logic "SWAP"
           setState(() {
-            // Lấy icon index hiện tại của FAB
-            int currentFabIconIndex = _iconSlots[2];
-
-            //Cập nhật trang sẽ hiển thị
             _pageIndex = iconIndex;
-
-            //Đưa icon của FAB (cũ) vào slot vừa nhấn
-            _iconSlots[slotIndex] = currentFabIconIndex;
-
-            //Đưa icon vừa nhấn (mới) vào slot FAB
-            _iconSlots[2] = iconIndex;
           });
         },
       ),
