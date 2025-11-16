@@ -21,7 +21,7 @@ class DestinationCard extends StatelessWidget {
     final img = destination.hinhAnh;
 
     //style Card
-    const Color kCardBorder = Color(0x14000000); // viền xám nhạt cố định
+    const Color kCardBorder = Color(0x14000000); // viền xám nhạt
     const double kElevationBlur = 10;
 
     return GestureDetector(
