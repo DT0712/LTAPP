@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../../home/data/home_references.dart';
+import '../../../../home/data/home_references.dart';
 import '../../data/destination_model.dart';
 import '../../data/destination_repository.dart';
 import '../widgets/destination_card.dart';
 import '../widgets/page_header_with_filters.dart';
-import '../../../home/presentation/widgets/skeletons.dart';
+import '../../../../home/presentation/widgets/skeletons.dart';
 
 class DestinationListPage extends StatefulWidget {
   const DestinationListPage({super.key});
