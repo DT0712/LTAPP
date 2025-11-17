@@ -7,7 +7,9 @@ import '../widgets/filter_panel.dart';
 import '../widgets/home_banner.dart';
 import '../widgets/categories_section.dart';
 import '../widgets/suggested_places_section.dart';
-import '../../../schedule/presentation/pages/schedule_page.dart';
+
+// 🔥 THAY SchedulePage → TourPage
+import '../../../tour/presentation/pages/tour_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,8 +36,11 @@ class _HomePageState extends State<HomePage> {
         child: IndexedStack(
           index: _currentIndex,
           children: [
-            const SchedulePage(),
+            // 🔥 Trang 0 = TourPage thay cho SchedulePage
+            const TourPage(),
+
             const Center(child: Text('Chat Page')),
+
             SingleChildScrollView(
               child: Column(
                 children: [
@@ -56,31 +61,29 @@ class _HomePageState extends State<HomePage> {
                       }),
                     ),
                   const HomeBanner(),
-                  const CategoriesSection(), // ← XÓA `const` → vì không có const constructor
+                  const CategoriesSection(),
                   SuggestedPlacesSection(selectedQuan: selectedQuan),
                 ],
               ),
             ),
+
             const Center(child: Text('Notifications Page')),
             const Center(child: Text('Profile Page')),
           ],
         ),
       ),
-      //FloatingActionButton
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: primaryBlue,
         elevation: 8.0,
         shape: const CircleBorder(),
         child: Icon(
-          _navIcons[_currentIndex]
-              ['filled'], // Hiển thị icon của trang hiện tại
+          _navIcons[_currentIndex]['filled'],
           color: Colors.black,
           size: 28,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      //BottomAppBar
       bottomNavigationBar: BottomAppBar(
         color: primaryBlue,
         shape: const CircularNotchedRectangle(),
@@ -88,19 +91,15 @@ class _HomePageState extends State<HomePage> {
         elevation: 8,
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 2 item bên trái
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: _buildSideItems(left: true),
               ),
               const SizedBox(width: 56),
-              // 2 item bên phải
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: _buildSideItems(left: false),
               ),
             ],
@@ -110,7 +109,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Icon data mapping for each page index
   List<Map<String, IconData>> get _navIcons => [
         {
           'filled': Icons.calendar_today,
@@ -124,25 +122,27 @@ class _HomePageState extends State<HomePage> {
         },
         {'filled': Icons.person, 'outlined': Icons.person_outline},
       ];
-  // Build the left or right side items (two icons each)
+
   List<Widget> _buildSideItems({required bool left}) {
-    // all indices
     final all = [0, 1, 2, 3, 4];
-    // remove the selected index
     final others = all.where((i) => i != _currentIndex).toList();
-    // left takes first 2, right takes last 2
+
     final leftItems = others.take(2).toList();
     final rightItems = others.skip(2).toList();
+
     final pick = left ? leftItems : rightItems;
+
     return pick.map((idx) {
-      final icons = _navIcons[idx];
-      final filled = icons['filled']!;
-      final outlined = icons['outlined']!;
+      final filled = _navIcons[idx]['filled']!;
+      final outlined = _navIcons[idx]['outlined']!;
+
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: IconButton(
-          icon: Icon(_currentIndex == idx ? filled : outlined,
-              color: Colors.white),
+          icon: Icon(
+            _currentIndex == idx ? filled : outlined,
+            color: Colors.white,
+          ),
           onPressed: () => setState(() => _currentIndex = idx),
         ),
       );
