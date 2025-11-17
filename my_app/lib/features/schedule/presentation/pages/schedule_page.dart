@@ -1,8 +1,15 @@
+// lib/features/schedule/presentation/pages/schedule_page.dart
+
 import 'package:flutter/material.dart';
 import '../../data/schedule_repository.dart';
 import '../../data/schedule_model.dart';
-import '../widgets/schedule_filters_widget.dart';
-import '../widgets/category_carousel_widget.dart';
+
+import '../widgets/schedule_header.dart';
+import '../widgets/schedule_item_card.dart';
+
+import '../widgets/schedule_detail_dialog.dart';
+
+import '../../../home/presentation/widgets/skeletons.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -14,134 +21,192 @@ class SchedulePage extends StatefulWidget {
 
 class _SchedulePageState extends State<SchedulePage> {
   final ScheduleRepository _repo = ScheduleRepository();
-  String? _selectedDistrict;
+
   String? _selectedDuration;
+  String? _selectedScheduleId;
+  String _search = '';
+  final _searchCtrl = TextEditingController();
+
+  Future<List<String>>? _durationsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _durationsFuture = _repo.getUniqueDurations();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
-      backgroundColor: const Color(0xFFF7F9FC),
-      body: StreamBuilder<List<ScheduleItem>>(
-        stream: _repo.streamSchedules(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Lỗi: ${snapshot.error}'));
-          }
-
-          final items = snapshot.data ?? [];
-          if (items.isEmpty) {
-            return _buildEmptyState(); // Giữ lại hàm này vì nó đơn giản
-          }
-
-          // Lấy các bộ lọc duy nhất từ dữ liệu
-          final districts = <String>{'Tất cả'};
-          final durations = <String>{'Tất cả'};
-          for (final item in items) {
-            if (item.district.isNotEmpty) {
-              districts.add(item.district);
-            }
-            if (item.duration != null && item.duration!.isNotEmpty) {
-              durations.add(item.duration!);
-            }
-          }
-
-          // Lọc danh sách dựa trên các bộ lọc đã chọn
-          final filteredItems = items.where((item) {
-            final matchesDistrict = _selectedDistrict == null ||
-                _selectedDistrict == 'Tất cả' ||
-                item.district == _selectedDistrict;
-            final matchesDuration = _selectedDuration == null ||
-                _selectedDuration == 'Tất cả' ||
-                item.duration == _selectedDuration;
-            return matchesDistrict && matchesDuration;
-          }).toList();
-
-          // Nhóm theo danh mục
-          final Map<String, List<ScheduleItem>> grouped = {};
-          for (final it in filteredItems) {
-            final cat = it.category ?? 'Không xác định';
-            grouped.putIfAbsent(cat, () => []).add(it);
-          }
-
-          final sortedEntries = grouped.entries.toList();
-
-          // ListView chính
-          return ListView.custom(
-            padding: const EdgeInsets.all(0),
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) {
-                // Mục 0: Khu vực bộ lọc
-                if (index == 0) {
-                  return ScheduleFiltersWidget(
-                    districts: districts.toList(),
-                    durations: durations.toList(),
-                    selectedDistrict: _selectedDistrict,
-                    selectedDuration: _selectedDuration,
-                    onDistrictSelected: (val) =>
-                        setState(() => _selectedDistrict = val),
-                    onDurationSelected: (val) =>
-                        setState(() => _selectedDuration = val),
-                    onDistrictReset: () =>
-                        setState(() => _selectedDistrict = null),
-                    onDurationReset: () =>
-                        setState(() => _selectedDuration = null),
+      appBar: const ScheduleHeader(),
+      backgroundColor: Colors.orange,
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF7F9FC),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            FutureBuilder<List<String>>(
+              future: _durationsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  //
+                  return Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(top: 16, bottom: 4),
+                    child: const SkeletonChipRow(),
                   );
                 }
 
-                // Các mục còn lại: Carousel danh mục
-                final categoryIndex = index - 1;
-                if (categoryIndex < sortedEntries.length) {
-                  final entry = sortedEntries[categoryIndex];
-
-                  // Sử dụng widget CategoryCarouselWidget mới
-                  return CategoryCarouselWidget(
-                    category: entry.key,
-                    items: entry.value,
-                  );
+                if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
+                  //
+                  return const SizedBox.shrink();
                 }
 
-                return const SizedBox.shrink();
+                final durations = snapshot.data!;
+                return _buildDurationChips(durations);
               },
-              childCount: sortedEntries.length + 1,
             ),
+            Expanded(
+              child: StreamBuilder<List<ScheduleItem>>(
+                stream: _repo.streamSchedules(duration: _selectedDuration),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Lỗi: ${snapshot.error}'));
+                  }
+
+                  final items = snapshot.data ?? [];
+                  if (items.isEmpty) {
+                    return _buildEmptyState(
+                        message: 'Không có lịch trình phù hợp.');
+                  }
+
+                  final filteredItems = _search.isEmpty
+                      ? items
+                      : items.where((item) {
+                          final name = item.name.toLowerCase();
+                          final desc = item.describetion.toLowerCase();
+                          final query = _search.toLowerCase();
+                          return name.contains(query) || desc.contains(query);
+                        }).toList();
+
+                  if (filteredItems.isEmpty) {
+                    return _buildEmptyState(message: 'Không tìm thấy kết quả.');
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    itemCount: filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredItems[index];
+                      final isSelected = _selectedScheduleId == item.id;
+
+                      return ScheduleItemCard(
+                        item: item,
+                        selected: isSelected,
+                        onTap: () {
+                          setState(() => _selectedScheduleId =
+                              isSelected ? null : item.id);
+                        },
+
+                        // ===== ĐÃ SỬA =====
+                        onDetailPressed: () {
+                          // print('View details for ${item.id}');
+                          // Thay thế 'print' bằng 'showDialog'
+                          showDialog(
+                            context: context,
+                            barrierDismissible:
+                                true, // Cho phép đóng khi nhấn bên ngoài
+                            builder: (BuildContext dialogContext) {
+                              // Trả về widget dialog mới
+                              return ScheduleDetailDialog(item: item);
+                            },
+                          );
+                        },
+                        // ===== KẾT THÚC SỬA =====
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // (Hàm _buildDurationChips giữ nguyên)
+  Widget _buildDurationChips(List<String> durations) {
+    return Container(
+      height: 60, //
+      padding: const EdgeInsets.only(top: 16, bottom: 4),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemCount: durations.length,
+        itemBuilder: (_, i) {
+          final duration = durations[i];
+          final isSelected =
+              (_selectedDuration == null && duration == 'Tất cả') ||
+                  _selectedDuration == duration;
+
+          return ChoiceChip(
+            label: Text(duration),
+            selected: isSelected,
+            showCheckmark: false,
+            onSelected: (v) {
+              setState(() =>
+                  _selectedDuration = (duration == 'Tất cả' ? null : duration));
+            },
+            selectedColor: Colors.orange.shade100,
+            backgroundColor: Colors.white,
+            labelStyle: TextStyle(
+                color: isSelected ? Colors.orange.shade900 : Colors.grey[800],
+                fontWeight: FontWeight.w600),
+            shape: StadiumBorder(
+                side: BorderSide(
+                    color: isSelected ? Colors.orange : Colors.grey[300]!,
+                    width: 1.5)),
           );
         },
       ),
     );
   }
 
-  /// AppBar (Giữ lại đây vì nó là một phần của cấu trúc trang)
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.orange,
-      elevation: 0,
-      title: const Text(
-        'iTour',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
+  // (Hàm _buildEmptyState giữ nguyên)
+  Widget _buildEmptyState({String message = 'Chưa có lịch trình nào.'}) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_today, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('No schedules yet',
-              style: Theme.of(context).textTheme.titleLarge),
-          SizedBox(height: 8),
-          Text('Create your first schedule',
-              style: Theme.of(context).textTheme.bodyMedium),
+          const Icon(Icons.calendar_today, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(message,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontSize: 18)),
         ],
       ),
     );

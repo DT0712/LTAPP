@@ -62,13 +62,12 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // giữ nền/tiêu đề cố định khi mở bàn phím
       resizeToAvoidBottomInset: false,
       body: Stack(
         fit: StackFit.expand,
         children: [
           // Ảnh nền
-          Image.asset('assets/images/bgLogin.jpg', fit: BoxFit.cover),
+          Image.asset('assets/images/auth/itour_login_bg.jpg', fit: BoxFit.cover),
           // Lớp phủ mờ
           Container(color: Colors.black.withOpacity(0.4)),
 
@@ -80,13 +79,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   final size = MediaQuery.of(context).size;
                   final kb   = MediaQuery.of(context).viewInsets.bottom;
 
-                  // Card sẽ không cao quá phần không gian còn lại
                   final double cardMaxH =
                   (size.height - kb - 140).clamp(320.0, size.height);
 
                   return Stack(
                     children: [
-                      // ===== HEADER: cố định =====
                       const Align(
                         alignment: Alignment.topCenter,
                         child: Padding(
@@ -104,17 +101,16 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
 
-                      // ===== FORM: chỉ khối này nhấc theo bàn phím =====
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: AnimatedPadding(
                           duration: const Duration(milliseconds: 200),
                           curve: Curves.easeOut,
-                          padding: EdgeInsets.only(bottom: kb + 16), // chỉnh 16 -> 8/0 tùy ý
+                          padding: EdgeInsets.only(bottom: kb + 16),
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               maxWidth: 640,
-                              maxHeight: cardMaxH, // ✅ chặn overflow
+                              maxHeight: cardMaxH,
                             ),
                             child: Container(
                               width: double.infinity,
@@ -122,7 +118,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: Colors.white.withOpacity(0.90),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              // ✅ nội dung cuộn nếu dài
                               child: SingleChildScrollView(
                                 physics: const ClampingScrollPhysics(),
                                 padding: const EdgeInsets.all(20),
@@ -243,8 +238,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                           ),
                                         ),
                                       ),
-
-                                      // (ĐÃ XÓA) "Hoặc đăng nhập với" + Google/Apple
 
                                       const SizedBox(height: 12),
                                       TextButton(

@@ -1,6 +1,4 @@
-// lib/features/home/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../widgets/home_app_bar.dart';
 import '../widgets/filter_panel.dart';

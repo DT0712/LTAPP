@@ -55,6 +55,9 @@ flutter:
     - assets/images/food/
     - assets/images/Banner.jpg
     - assets/images/Luutru/
+    - assets/icons/
+    - assets/images/auth/
+    - assets/images/headers/
     - assets/images/transport/
     - assets/images/bgLogin.jpg
     - assets/icons/
@@ -62,4 +65,3 @@ flutter:
     - assets/images/auth/google.png
     - assets/images/auth/apple.png
     - assets/images/headers/accommodation_header.jpg
-    - assets/images/bannerLT.png

@@ -85,16 +85,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ❌ Không cho Scaffold tự đẩy toàn bộ nội dung
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Ảnh nền (luôn đứng yên)
           Image.asset('assets/images/auth/itour_login_bg.jpg', fit: BoxFit.cover),
 
-          // Lớp mờ
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -113,7 +110,6 @@ class _LoginPageState extends State<LoginPage> {
 
                   return Stack(
                     children: [
-                      // ===== HEADER: giữ nguyên vị trí, căn phải =====
                       Align(
                         alignment: Alignment.topRight,
                         child: Column(
@@ -157,7 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      // ===== FORM: chỉ khối này nhấc theo bàn phím =====
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: AnimatedPadding(
@@ -275,7 +270,6 @@ class _LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // or
           Row(
             children: const [
               Expanded(child: Divider()),
