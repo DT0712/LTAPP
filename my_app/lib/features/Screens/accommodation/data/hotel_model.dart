@@ -4,9 +4,9 @@ class Hotel {
   final String id;
   final String name;
   final String address;
-  final String district;     // quan_huyen_id
+  final String district;
   final String type;
-  final List<String> images; // luôn là List sau khi parse
+  final List<String> images;
   final double rating;
   final int? priceFrom;
 

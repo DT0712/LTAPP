@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../../../home/data/home_references.dart'; // quan_huyen
+import '../../../../home/data/home_references.dart';
 import '../../data/hotel_model.dart';
 import '../../data/hotel_repository.dart';
 import '../widgets/hotel_card.dart';
-// Skeletons: bạn vẫn có SkeletonHotelCard & SkeletonChipRow
-import '../../../home/presentation/widgets/skeletons.dart';
+import '../../../../home/presentation/widgets/skeletons.dart';
 
 class HotelListPage extends StatefulWidget {
   const HotelListPage({super.key, this.defaultType = 'Khách sạn'});
@@ -26,13 +25,12 @@ class _HotelListPageState extends State<HotelListPage>
   final List<String> _types = const ['Khách sạn', 'Homestay', 'Resort'];
   late String _selectedType;
 
-  String? _selectedDistrictId; // lọc quận (docId)
-  String? _selectedHotelId; // item đang chọn để hiện nút “Đặt ngay”
+  String? _selectedDistrictId; // lọc quận
+  String? _selectedHotelId;
 
   final _searchCtrl = TextEditingController();
   String _search = '';
 
-  // Giữ vị trí list chips + list khách sạn
   final ScrollController _districtCtrl = ScrollController();
   final ScrollController _hotelListCtrl = ScrollController();
 
@@ -42,12 +40,10 @@ class _HotelListPageState extends State<HotelListPage>
   RangeValues _priceRange = const RangeValues(_kPriceMin, _kPriceMax);
   double _minRating = 0; // 0..5
 
-  // ======= PAGE ENTER ANIMATION =======
   late final AnimationController _enterCtl;
   late final Animation<double> _fadeIn;
   late final Animation<Offset> _slideUp;
 
-  // ======= Skeleton giữ tối thiểu (toàn trang) =======
   static const Duration _minSkeleton = Duration(milliseconds: 500);
 
   bool _chipsTimerDone = false;
@@ -75,7 +71,6 @@ class _HotelListPageState extends State<HotelListPage>
             CurvedAnimation(parent: _enterCtl, curve: Curves.easeOutCubic));
     _enterCtl.forward();
 
-    // Đếm thời gian tối thiểu cho CHIPS + LIST (độc lập)
     Future.delayed(_minSkeleton, () {
       if (!mounted) return;
       setState(() => _chipsTimerDone = true);
@@ -95,7 +90,6 @@ class _HotelListPageState extends State<HotelListPage>
     super.dispose();
   }
 
-  // ======= FORMAT VNĐ =======
   String _formatVND(num? value) {
     if (value == null) return '0 VND';
     final s = value.toStringAsFixed(0);
@@ -137,7 +131,6 @@ class _HotelListPageState extends State<HotelListPage>
                   ),
                   const SizedBox(height: 18),
 
-                  // Sao tối thiểu
                   Row(
                     children: [
                       const Text('Số sao tối thiểu',
@@ -238,7 +231,7 @@ class _HotelListPageState extends State<HotelListPage>
           position: _slideUp,
           child: Column(
             children: [
-              // ============== HEADER ẢNH PHỦ ==============
+              // ============== HEADER ==============
               _HeaderWithImage(
                 title: 'LƯU TRÚ',
                 selectedType: _selectedType,
@@ -299,7 +292,7 @@ class _HotelListPageState extends State<HotelListPage>
               ),
               const SizedBox(height: 10),
 
-              // ============== CHIPS QUẬN/HUYỆN ==============
+              // ============== QUẬN/HUYỆN ==============
               SizedBox(
                 height: 40,
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -377,7 +370,6 @@ class _HotelListPageState extends State<HotelListPage>
                 ),
               ),
 
-              // ============== DIVIDER ==============
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Container(height: 3, color: dividerColor),
@@ -391,7 +383,6 @@ class _HotelListPageState extends State<HotelListPage>
                     district: _selectedDistrictId,
                   ),
                   builder: (context, snapshot) {
-                    // đánh dấu data list đã về lần đầu
                     if (snapshot.hasData && !_listDataArrived) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted) setState(() => _listDataArrived = true);
@@ -542,15 +533,15 @@ class _HotelListPageState extends State<HotelListPage>
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          content, // nội dung thật
-          overlay, // skeleton phủ toàn trang khi cần
+          content,
+          overlay,
         ],
       ),
     );
   }
 }
 
-// ======================== HEADER ẢNH PHỦ ========================
+// ======================== HEADER ========================
 class _HeaderWithImage extends StatelessWidget {
   const _HeaderWithImage({
     required this.title,

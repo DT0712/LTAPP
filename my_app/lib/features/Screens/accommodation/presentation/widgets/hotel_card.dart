@@ -27,8 +27,7 @@ class HotelCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final img = (hotel.images.isNotEmpty) ? hotel.images.first : null;
 
-    // ✅ Không đổi viền khi selected (xoá highlight xanh)
-    const Color kCardBorder = Color(0x14000000); // viền xám nhạt luôn cố định
+    const Color kCardBorder = Color(0x14000000);
     const double kElevationBlur = 10;
 
     return GestureDetector(
@@ -55,7 +54,6 @@ class HotelCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ảnh (❌ bỏ viền xanh overlay)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
@@ -178,7 +176,6 @@ class HotelCard extends StatelessWidget {
               ],
             ),
 
-            // Nút "Đặt ngay" (giữ animation nhưng không đổi border khi selected)
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,

@@ -18,22 +18,19 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  static const Color primaryBlue = Color(0xFFAED2FF);
-  static const Color backgroundColor = Color(0xFFF7F9FC);
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  // Màu nền cũ & màu bar
+  static const Color kBarColor = Color(0xFFAED2FF);      // màu cũ
+  static const Color kBgColor  = Color(0xFFF7F9FC);
+  static const Color kIndicator = Color(0xFF86B9FF);     // màu đậm hơn để nổi
 
-  // --- State chính cho điều hướng ---
-  int _pageIndex = 2; // Bắt đầu ở trang chủ (index 2)
+  int _pageIndex = 2; // 0: lịch, 1: chat, 2: home, 3: thông báo, 4: profile
 
-  // Danh sách các trang, không thay đổi
-  final List<Widget> _pages = [
-    //Lịch (Index 0)
+  // Danh sách trang
+  late final List<Widget> _pages = [
     const SchedulePage(),
-
-    //Chat (Index 1)
     const ChatPage(),
-
-    //Trang chủ (Index 2)
+    // Home scroll content
     StatefulBuilder(
       builder: (BuildContext context, StateSetter setHomeState) {
         String? selectedQuan;
@@ -65,118 +62,152 @@ class _HomePageState extends State<HomePage> {
         );
       },
     ),
-
-    //Thông báo (Index 3)
     const NotificationPage(),
-
-    // Profile (Index 4)
     const ProfilePage(),
+  ];
+
+  // Icon cho từng tab
+  final List<Map<String, IconData>> _navIcons = const [
+    {'filled': Icons.calendar_today, 'outlined': Icons.calendar_today_outlined},
+    {'filled': Icons.chat_bubble,    'outlined': Icons.chat_bubble_outline},
+    {'filled': Icons.home,           'outlined': Icons.home_outlined},
+    {'filled': Icons.notifications,  'outlined': Icons.notifications_outlined},
+    {'filled': Icons.person,         'outlined': Icons.person_outline},
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Không cần 'fabIconIndex' hay '_iconSlots' nữa
-
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: backgroundColor,
+      backgroundColor: kBgColor,
       body: SafeArea(
         bottom: false,
         child: IndexedStack(
-          index: _pageIndex, // Hiển thị trang theo _pageIndex
+          index: _pageIndex,
           children: _pages,
         ),
       ),
-      //FloatingActionButton (Luôn là Trang chủ)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Khi nhấn FAB, luôn đặt _pageIndex = 2
-          setState(() {
-            _pageIndex = 2;
-          });
-        },
-        backgroundColor: primaryBlue,
-        elevation: 8.0,
-        shape: const CircleBorder(),
-        child: Icon(
-          _navIcons[2]['filled'], // Luôn hiển thị icon 'home' (index 2)
-          color: Colors.black,
-          size: 28,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      //BottomAppBar
-      bottomNavigationBar: BottomAppBar(
-        color: primaryBlue,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        elevation: 8,
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // 2 item bên trái (Cố định)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  //icon cho Lịch (index 0)
-                  _buildBarIcon(iconIndex: 0),
-                  //icon cho Chat (index 1)
-                  _buildBarIcon(iconIndex: 1),
-                ],
-              ),
-              const SizedBox(width: 56), // Khoảng trống cho FAB
-              // 2 item bên phải (Cố định)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  //icon cho Thông báo (index 3)
-                  _buildBarIcon(iconIndex: 3),
-                  //icon cho Profile (index 4)
-                  _buildBarIcon(iconIndex: 4),
-                ],
-              ),
-            ],
-          ),
-        ),
+      // Thanh điều hướng custom
+      bottomNavigationBar: _BottomNavBar(
+        currentIndex: _pageIndex,
+        icons: _navIcons,
+        barColor: kBarColor,
+        indicatorColor: kIndicator,
+        onTap: (i) => setState(() => _pageIndex = i),
       ),
     );
   }
+}
 
-  // Icon data mapping for each page index
-  List<Map<String, IconData>> get _navIcons => [
-        {
-          'filled': Icons.calendar_today,
-          'outlined': Icons.calendar_today_outlined
-        },
-        {'filled': Icons.chat_bubble, 'outlined': Icons.chat_bubble_outline},
-        {'filled': Icons.home, 'outlined': Icons.home_outlined},
-        {
-          'filled': Icons.notifications,
-          'outlined': Icons.notifications_outlined
-        },
-        {'filled': Icons.person, 'outlined': Icons.person_outline},
-      ];
+/// ================== Bottom Nav tùy biến có hình tròn trượt ==================
+class _BottomNavBar extends StatelessWidget {
+  const _BottomNavBar({
+    required this.currentIndex,
+    required this.icons,
+    required this.onTap,
+    required this.barColor,
+    required this.indicatorColor,
+  });
 
-  // Hàm build icon
-  Widget _buildBarIcon({required int iconIndex}) {
-    bool isSelected = (_pageIndex == iconIndex);
-    final icons = _navIcons[iconIndex];
+  final int currentIndex;
+  final List<Map<String, IconData>> icons;
+  final ValueChanged<int> onTap;
+  final Color barColor;
+  final Color indicatorColor;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0),
-      child: IconButton(
-        icon: Icon(
-          isSelected ? icons['filled']! : icons['outlined']!,
-          color: Colors.white,
+  static const double _barHeight = 66;
+  static const double _indicatorSize = 46;
+  static const Duration _animDur = Duration(milliseconds: 260);
+  static const Curve _animCurve = Curves.easeOutCubic;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        // Không padding/margin để phủ full bề ngang & chạm đáy
+        height: _barHeight,
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final itemCount = icons.length;
+            final slotWidth = width / itemCount;
+            final indicatorCenterX = slotWidth * (currentIndex + 0.5);
+
+            return Stack(
+              children: [
+                // NỀN: hình chữ nhật phủ toàn bộ bên dưới & 2 bên
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // VÒNG TRÒN CHỈ BÁO (trượt)
+                AnimatedPositioned(
+                  duration: _animDur,
+                  curve: _animCurve,
+                  left: indicatorCenterX - (_indicatorSize / 2),
+                  // canh giữa theo trục dọc trong thanh
+                  top: (_barHeight - _indicatorSize) / 2,
+                  child: Container(
+                    width: _indicatorSize,
+                    height: _indicatorSize,
+                    decoration: BoxDecoration(
+                      color: indicatorColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: indicatorColor.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // HÀNG ICON (chia đều full width)
+                Row(
+                  children: List.generate(itemCount, (i) {
+                    final isActive = (i == currentIndex);
+                    final iconPair = icons[i];
+
+                    return Expanded(
+                      child: InkWell(
+                        onTap: () => onTap(i),
+                        child: Center(
+                          child: AnimatedScale(
+                            scale: isActive ? 1.05 : 1.0,
+                            duration: _animDur,
+                            curve: _animCurve,
+                            child: Icon(
+                              isActive ? iconPair['filled']! : iconPair['outlined']!,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            );
+          },
         ),
-        onPressed: () {
-          setState(() {
-            _pageIndex = iconIndex;
-          });
-        },
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AttractionReferences {
   static final _db = FirebaseFirestore.instance;
 
-  /// Collection quận/huyện dùng chung cho toàn app
+  /// Collection quận/huyện
   static CollectionReference<Map<String, dynamic>> get quanHuyenRef =>
       _db.collection('quan_huyen');
 

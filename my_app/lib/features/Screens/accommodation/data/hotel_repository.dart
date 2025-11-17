@@ -6,7 +6,6 @@ class HotelRepository {
   HotelRepository({FirebaseFirestore? firestore})
       : _db = firestore ?? FirebaseFirestore.instance;
 
-  // Map nhãn trên UI -> id đường dẫn (tên doc trong luu_tru)
   String _toTypeId(String? typeLabel) {
     switch ((typeLabel ?? '').trim()) {
       case 'Khách sạn':
@@ -20,15 +19,15 @@ class HotelRepository {
     }
   }
 
-  // >>> PATH ĐÚNG: luu_tru/{typeId}/1  (subcollection tên "1")
+
   CollectionReference<Map<String, dynamic>> _colFor(String typeId) {
     return _db.collection('luu_tru').doc(typeId).collection('1');
   }
 
-  /// Lấy danh sách lưu trú, lọc theo quận (quan_huyen_id) + sắp xếp theo danh_gia
+
   Stream<List<Hotel>> streamHotels({
-    String? type,        // "Khách sạn" | "Homestay" | "Resort" (nhãn UI)
-    String? district,    // quan_huyen_id (vd: "quan_1")
+    String? type,
+    String? district,
   }) {
     final typeId = _toTypeId(type);
     Query<Map<String, dynamic>> q = _colFor(typeId);
@@ -37,7 +36,7 @@ class HotelRepository {
       q = q.where('quan_huyen_id', isEqualTo: district);
     }
 
-    // Sắp xếp theo đánh giá (number)
+    // Sắp xếp theo đánh giá
     q = q.orderBy('danh_gia', descending: true);
 
     return q.snapshots().map(

@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../../data/attraction_references.dart';
-import '../../data/attraction_model.dart';          // <-- model Attraction
-import '../widgets/attraction_card.dart';           // <-- yêu cầu: attraction: Attraction
+import '../../data/attraction_model.dart';
+import '../widgets/attraction_card.dart';
 
 class AttractionListPage extends StatefulWidget {
   const AttractionListPage({super.key});
@@ -30,15 +29,12 @@ class _AttractionListPageState extends State<AttractionListPage> {
   }
 
   // ========= Helpers =========
-
-  /// Parse list/str -> List<String>
   List<String> _imagesOf(dynamic v) {
     if (v is List) return v.map((e) => e.toString()).toList();
     if (v is String && v.isNotEmpty) return [v];
     return const <String>[];
   }
 
-  /// Firestore doc -> Attraction model
   Attraction _fromSnap(DocumentSnapshot<Map<String, dynamic>> d) {
     final m = d.data() ?? const <String, dynamic>{};
     return Attraction(
@@ -135,7 +131,6 @@ class _AttractionListPageState extends State<AttractionListPage> {
                     );
                   }
 
-                  // fallback gom từ khu_vui_choi
                   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: AttractionReferences.attractionsRef.snapshots(),
                     builder: (context, atSnap) {
@@ -221,9 +216,9 @@ class _AttractionListPageState extends State<AttractionListPage> {
                     itemCount: docs.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
-                      final a = _fromSnap(docs[index]); // <-- model
+                      final a = _fromSnap(docs[index]);
                       return AttractionCard(
-                        attraction: a,                 // <-- đúng kiểu
+                        attraction: a,
                         onTap: () {
                           // TODO: mở chi tiết
                         },
@@ -329,7 +324,6 @@ class _HeaderWithImage extends StatelessWidget {
   }
 }
 
-// ================== Chips component ==================
 class _DistrictChips extends StatelessWidget {
   const _DistrictChips({
     required this.items,
@@ -338,7 +332,7 @@ class _DistrictChips extends StatelessWidget {
     this.controller,
   });
 
-  final List<Map<String, Object>> items; // {id, ten, thu_tu}
+  final List<Map<String, Object>> items;
   final String? selectedId;
   final ValueChanged<String?> onSelect;
   final ScrollController? controller;

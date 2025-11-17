@@ -5,18 +5,17 @@ class AttractionCard extends StatelessWidget {
   const AttractionCard({
     super.key,
     this.attraction,
-    this.item,                 // Back-compat: map kiểu cũ
+    this.item,
     this.onTap,
     this.onBook,
   }) : assert(attraction != null || item != null,
   'Provide either `attraction` (model) or `item` (Map).');
 
-  final Attraction? attraction;                 // mới
-  final Map<String, dynamic>? item;            // cũ
+  final Attraction? attraction;
+  final Map<String, dynamic>? item;
   final VoidCallback? onTap;
   final VoidCallback? onBook;
 
-  // Chuyển map cũ -> model khi cần
   Attraction _fromItem(Map<String, dynamic> m) {
     List<String> _imagesOf(dynamic v) {
       if (v is List) return v.map((e) => e.toString()).toList();
@@ -38,7 +37,6 @@ class AttractionCard extends StatelessWidget {
     );
   }
 
-  // format VND: 1.234.567
   String _fmtVND(num value) {
     final s = value.toStringAsFixed(0);
     final re = RegExp(r'\B(?=(\d{3})+(?!\d))');
