@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// Dùng route name của màn đăng nhập
+import '../../../auth/presentation/login_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,6 +14,9 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _notifOn = true;
   String _language = 'Tiếng Việt';
 
+  // Để biết là người dùng vừa bấm Đăng xuất (để show thông báo thành công)
+  bool _signedOut = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,8 +27,20 @@ class _ProfilePageState extends State<ProfilePage> {
           builder: (context, snap) {
             final user = snap.data;
 
-            // Chưa đăng nhập
+            // Không có user
             if (user == null) {
+              // Nếu vừa sign out xong: hiển thị màn đã đăng xuất thành công
+              if (_signedOut) {
+                return _SignedOut(
+                  onGoLogin: () {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      LoginPage.routeName,
+                          (route) => false,
+                    );
+                  },
+                );
+              }
+              // Chưa đăng nhập
               return _NotSignedIn(
                 onSignInHint: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -43,7 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
             final email = user.email ?? '';
             final phone = user.phoneNumber ?? '';
 
-            // Fallback tên nếu thiếu
             final name = (displayName?.isNotEmpty ?? false)
                 ? displayName!
                 : (email.isNotEmpty ? email.split('@').first : 'Người dùng');
@@ -54,7 +70,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 8),
-                      // ===== Header (KHÔNG có mũi tên back) =====
                       _HeaderCard(
                         name: name,
                         email: email,
@@ -62,17 +77,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         onEdit: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text(
-                                'Tính năng chỉnh sửa hồ sơ sẽ sớm có 😄',
-                              ),
+                              content: Text('Tính năng chỉnh sửa hồ sơ sẽ sớm có 😄'),
                             ),
                           );
                         },
                       ),
-
                       const SizedBox(height: 12),
 
-                      // ===== Group 1 =====
+                      // ===== Nhóm 1 =====
                       _SectionCard(
                         children: [
                           _SettingTile(
@@ -96,10 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           _SettingTile(
                             icon: Icons.language_outlined,
                             title: 'Ngôn ngữ',
-                            trailing: Text(
-                              _language,
-                              style: _trailingStyle,
-                            ),
+                            trailing: Text(_language, style: _trailingStyle),
                             onTap: () async {
                               final val = await _pickOption(
                                 context,
@@ -113,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
 
-                      // ===== Group 2 (đã gỡ mục Chủ đề) =====
+                      // ===== Nhóm 2 =====
                       _SectionCard(
                         children: [
                           _SettingTile(
@@ -131,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
 
-                      // ===== Group 3 =====
+                      // ===== Nhóm 3 =====
                       _SectionCard(
                         children: const [
                           _SettingTile(
@@ -154,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       const SizedBox(height: 8),
 
-                      // Thông tin tài khoản hiện tại
+                      // Thông tin tài khoản
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: _AccountInfo(
@@ -178,7 +187,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             label: const Text('Đăng xuất'),
                             onPressed: () async {
                               await FirebaseAuth.instance.signOut();
-                              if (mounted) Navigator.of(context).maybePop();
+                              if (!mounted) return;
+                              setState(() {
+                                _signedOut = true; // để biết hiển thị trạng thái đã đăng xuất
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Đăng xuất thành công.'),
+                                ),
+                              );
                             },
                           ),
                         ),
@@ -206,7 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
         required String title,
         required List<String> options,
         required String current,
-      }) async {
+      }) {
     return showModalBottomSheet<String>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -226,10 +243,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
+            Text(title,
+                style:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             ...options.map(
                   (o) => ListTile(
@@ -266,7 +282,7 @@ class _HeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Nền cong nhẹ
+        // nền bo dưới
         Container(
           height: 180,
           width: double.infinity,
@@ -279,12 +295,11 @@ class _HeaderCard extends StatelessWidget {
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           ),
         ),
-        // Nội dung
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
-              // HÀNG TRÊN: chỉ có nút edit bên phải (đÃ bỏ nút back)
+              // chỉ có nút edit bên phải (không có back)
               Row(
                 children: [
                   const Spacer(),
@@ -504,6 +519,43 @@ class _NotSignedIn extends StatelessWidget {
             ElevatedButton(
               onPressed: onSignInHint,
               child: const Text('Hướng dẫn đăng nhập'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SignedOut extends StatelessWidget {
+  const _SignedOut({required this.onGoLogin});
+  final VoidCallback onGoLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle_outline, size: 68, color: Colors.green),
+            const SizedBox(height: 12),
+            const Text(
+              'Bạn đã đăng xuất thành công',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Bạn có thể quay lại trang đăng nhập để đăng nhập tài khoản khác.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: onGoLogin,
+              icon: const Icon(Icons.login),
+              label: const Text('Về trang đăng nhập'),
             ),
           ],
         ),

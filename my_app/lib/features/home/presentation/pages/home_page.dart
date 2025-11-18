@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/home_app_bar.dart';
 import '../widgets/filter_panel.dart';
 import '../widgets/home_banner.dart';
@@ -18,10 +17,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  // Màu nền cũ & màu bar
-  static const Color kBarColor = Color(0xFFAED2FF); // màu cũ
+  static const Color kBarColor = Color(0xFFAED2FF);
   static const Color kBgColor = Color(0xFFF7F9FC);
-  static const Color kIndicator = Color(0xFF86B9FF); // màu đậm hơn để nổi
+  static const Color kIndicator = Color(0xFF86B9FF);
 
   int _pageIndex = 2; // 0: lịch, 1: chat, 2: home, 3: thông báo, 4: profile
 
@@ -94,7 +92,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 }
 
-/// ================== Bottom Nav tùy biến có hình tròn trượt ==================
+/// ================== Bottom Nav ==================
 class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar({
     required this.currentIndex,
@@ -120,7 +118,6 @@ class _BottomNavBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: SizedBox(
-        // Không padding/margin để phủ full bề ngang & chạm đáy
         height: _barHeight,
         width: double.infinity,
         child: LayoutBuilder(
@@ -132,7 +129,6 @@ class _BottomNavBar extends StatelessWidget {
 
             return Stack(
               children: [
-                // NỀN: hình chữ nhật phủ toàn bộ bên dưới & 2 bên
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -152,12 +148,11 @@ class _BottomNavBar extends StatelessWidget {
                   ),
                 ),
 
-                // VÒNG TRÒN CHỈ BÁO (trượt)
+                // VÒNG TRÒN (trượt)
                 AnimatedPositioned(
                   duration: _animDur,
                   curve: _animCurve,
                   left: indicatorCenterX - (_indicatorSize / 2),
-                  // canh giữa theo trục dọc trong thanh
                   top: (_barHeight - _indicatorSize) / 2,
                   child: Container(
                     width: _indicatorSize,
@@ -176,7 +171,7 @@ class _BottomNavBar extends StatelessWidget {
                   ),
                 ),
 
-                // HÀNG ICON (chia đều full width)
+                // HÀNG ICON
                 Row(
                   children: List.generate(itemCount, (i) {
                     final isActive = (i == currentIndex);

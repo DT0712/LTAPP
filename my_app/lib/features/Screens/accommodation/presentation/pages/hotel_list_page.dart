@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../home/data/home_references.dart';
 import '../../data/hotel_model.dart';
 import '../../data/hotel_repository.dart';
