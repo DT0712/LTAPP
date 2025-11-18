@@ -20,7 +20,6 @@ class _TourPageState extends State<TourPage> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // ------------------- APPBAR STYLE 2 -------------------
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(220),
         child: AppBar(
@@ -33,16 +32,8 @@ class _TourPageState extends State<TourPage> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Ảnh nền
-                Image.asset(
-                  "assets/images/bannerLT.png",
-                  fit: BoxFit.cover,
-                ),
-
-                // Layer mờ (glass)
+                Image.asset("assets/images/bannerLT.png", fit: BoxFit.cover),
                 Container(color: Colors.black.withOpacity(0.15)),
-
-                // Gradient tạo chiều sâu
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -56,8 +47,6 @@ class _TourPageState extends State<TourPage> {
                     ),
                   ),
                 ),
-
-                // Họa tiết ánh sáng
                 Positioned(
                   top: -40,
                   right: -40,
@@ -76,15 +65,13 @@ class _TourPageState extends State<TourPage> {
         ),
       ),
 
-      // ---------------- BODY ----------------
+      // BODY
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //-------------------------------------------------------
-            // CHỌN QUẬN (CHIPS)
-            //-------------------------------------------------------
+            // ------------------ CHỌN QUẬN ------------------
             StreamBuilder<List<Map<String, dynamic>>>(
               stream: TourRepository.getDistricts(),
               builder: (context, snap) {
@@ -104,10 +91,9 @@ class _TourPageState extends State<TourPage> {
                         isSelected: selectedDistrict == "Ngẫu nhiên",
                         onTap: () {
                           setState(() {
-                            selectedDistrict =
-                                (selectedDistrict == "Ngẫu nhiên")
-                                    ? null
-                                    : "Ngẫu nhiên";
+                            selectedDistrict = selectedDistrict == "Ngẫu nhiên"
+                                ? null
+                                : "Ngẫu nhiên";
                           });
                         },
                       ),
@@ -121,7 +107,7 @@ class _TourPageState extends State<TourPage> {
                             onTap: () {
                               setState(() {
                                 selectedDistrict =
-                                    (selectedDistrict == e) ? null : e;
+                                    selectedDistrict == e ? null : e;
                               });
                             },
                           ),
@@ -135,9 +121,7 @@ class _TourPageState extends State<TourPage> {
 
             const SizedBox(height: 16),
 
-            //-------------------------------------------------------
-            // CHỌN THỜI GIAN
-            //-------------------------------------------------------
+            // ------------------ CHỌN THỜI GIAN ------------------
             SizedBox(
               height: 45,
               child: ListView(
@@ -149,7 +133,7 @@ class _TourPageState extends State<TourPage> {
                     onTap: () {
                       setState(() {
                         selectedTime =
-                            (selectedTime == "1_ngay") ? null : "1_ngay";
+                            selectedTime == "1_ngay" ? null : "1_ngay";
                       });
                     },
                   ),
@@ -159,7 +143,7 @@ class _TourPageState extends State<TourPage> {
                     isSelected: selectedTime == "2n1d",
                     onTap: () {
                       setState(() {
-                        selectedTime = (selectedTime == "2n1d") ? null : "2n1d";
+                        selectedTime = selectedTime == "2n1d" ? null : "2n1d";
                       });
                     },
                   ),
@@ -169,7 +153,7 @@ class _TourPageState extends State<TourPage> {
                     isSelected: selectedTime == "3n2d",
                     onTap: () {
                       setState(() {
-                        selectedTime = (selectedTime == "3n2d") ? null : "3n2d";
+                        selectedTime = selectedTime == "3n2d" ? null : "3n2d";
                       });
                     },
                   ),
@@ -179,6 +163,60 @@ class _TourPageState extends State<TourPage> {
 
             const SizedBox(height: 16),
 
+            // ------------------ GRADIENT DIVIDER ------------------
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFFFFA726),
+                            Color(0xFFBDBDBD),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      "Lịch trình",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        letterSpacing: 0.5,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFFBDBDBD),
+                            Color(0xFFFFA726),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // ------------------ NỘI DUNG ------------------
             Expanded(child: _buildContent()),
           ],
         ),
@@ -186,7 +224,7 @@ class _TourPageState extends State<TourPage> {
     );
   }
 
-  // ---------------- CHIP ----------------
+  // CHIP UI
   Widget _buildChip({
     required String label,
     required bool isSelected,
@@ -223,7 +261,7 @@ class _TourPageState extends State<TourPage> {
     );
   }
 
-  // ---------------- CONTENT ----------------
+  // DỮ LIỆU LỊCH TRÌNH
   Widget _buildContent() {
     if (selectedDistrict == null || selectedTime == null) {
       return const Center(child: Text("Hãy chọn khu vực và thời gian"));
@@ -256,14 +294,13 @@ class _TourPageState extends State<TourPage> {
               _buildSection("Buổi chiều", danhSach["chieu"]),
               _buildSection("Buổi tối", danhSach["toi"]),
             ] else ...[
-              // Nếu dữ liệu nhiều ngày, vẫn giữ thứ tự
               for (var ngay in danhSach.keys.toList()..sort())
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
                     Text(
-                      ngay.toUpperCase(),
+                      _convertNgayLabel(ngay),
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
@@ -280,16 +317,22 @@ class _TourPageState extends State<TourPage> {
     );
   }
 
-  // ---------------- SECTION ----------------
+  String _convertNgayLabel(String raw) {
+    raw = raw.toLowerCase().trim();
+    if (raw.startsWith("ngay_")) {
+      final num = raw.replaceAll("ngay_", "");
+      return "Ngày $num";
+    }
+    return raw;
+  }
+
   Widget _buildSection(String title, List items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        Text(title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         ...items.map((i) => TourItem(
               ten: i["ten"],
