@@ -50,17 +50,23 @@ class DestinationCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ảnh
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 120,
-                    height: 90,
-                    child: Image.asset(
-                      img.isEmpty ? 'assets/images/DanhMuc/default.png' : img,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.broken_image_outlined),
+                // Ảnh (Đã thêm Hero)
+                Hero(
+                  tag: destination.id, // Tag quan trọng để tạo hiệu ứng bay
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 120,
+                      height: 90,
+                      child: Image.asset(
+                        // Sửa đường dẫn mặc định cho đồng bộ
+                        img.isEmpty ? 'assets/images/DiaDiem/default.png' : img,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.broken_image_outlined),
+                        ),
+                      ),
                     ),
                   ),
                 ),

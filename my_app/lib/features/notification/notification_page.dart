@@ -79,7 +79,7 @@ class _NotificationPageState extends State<NotificationPage>
                 children: [
                   const Text('Gợi ý'),
                   const SizedBox(width: 4),
-                  // Badge "12"
+                  // Badge "10"
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -88,7 +88,7 @@ class _NotificationPageState extends State<NotificationPage>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      '12',
+                      '10',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -110,15 +110,14 @@ class _NotificationPageState extends State<NotificationPage>
           // Tab "Chung"
           _buildNotificationList(),
 
-          // Tab "Gợi ý" (Hiện đang trống, bạn có thể thêm ListView khác)
-          const Center(child: Text('Không có gợi ý nào')),
+          // Tab "Gợi ý"
+          _buildSuggestionList(),
         ],
       ),
     );
   }
 
-  // --- HÀM _buildHeader ---
-
+  // Danh sách thông báo Chung
   Widget _buildNotificationList() {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -127,40 +126,182 @@ class _NotificationPageState extends State<NotificationPage>
         _NotificationListItem(
           imageAsset: 'assets/images/notification/highlands.webp',
           title: 'ĐẶT BÀN THÀNH CÔNG',
-          subtitle: 'Bạn đã đặt bàn ở HighLands thành công...',
-          time: '1 phút trước.',
+          subtitle: 'Bạn đã đặt bàn ở HighLands thành công. Mã vé: #HL8823...',
+          time: '1 phút trước',
           hasBadge: true,
-          badgeCount: '2',
+          badgeCount: '1',
         ),
+
         // Item 2
+        _NotificationListItem(
+          imageAsset: 'assets/images/notification/spicybox.png',
+          title: 'SIÊU SALE GIỜ VÀNG',
+          subtitle: 'SpicyBox giảm giá 50% combo lẩu chỉ trong 2 giờ tới...',
+          time: '15 phút trước',
+          hasBadge: true,
+          badgeCount: '1',
+        ),
+
+        // Item 3
+        _NotificationListItem(
+          imageAsset: 'assets/images/chat/the_reverie_saigon.png',
+          title: 'SẮP ĐẾN GIỜ CHECK-IN',
+          subtitle:
+              'Bạn có lịch đặt phòng tại The Reverie vào 14:00 chiều nay...',
+          time: '30 phút trước',
+          hasBadge: true,
+          badgeCount: '!',
+        ),
+
+        // Item 4
+        _NotificationListItem(
+          imageAsset: 'assets/images/notification/highlands.webp',
+          title: 'GIAO HÀNG THÀNH CÔNG',
+          subtitle: 'Tài xế đã giao đơn hàng trà sen vàng đến sảnh tòa nhà...',
+          time: '2 giờ trước',
+        ),
+
+        // Item 5
+        _NotificationListItem(
+          imageAsset: 'assets/images/DiaDiem/landmark_81.jpg',
+          title: 'BẠN CẢM THẤY THẾ NÀO?',
+          subtitle:
+              'Hãy chia sẻ cảm nhận về chuyến đi Landmark 81 vừa qua nhé...',
+          time: '5 giờ trước',
+        ),
+
+        // Item 6
         _NotificationListItem(
           imageAsset: 'assets/images/headers/destination_header.jpg',
           title: 'GỢI Ý ĐỊA ĐIỂM',
-          subtitle: 'Gần bạn...',
-          time: '1 phút trước.',
-          hasBadge: true,
-          badgeCount: '2',
+          subtitle:
+              'Phát hiện 3 quán cafe view đẹp mới mở gần vị trí của bạn...',
+          time: '10 giờ trước',
         ),
+
+        // Item 7
+        _NotificationListItem(
+          imageAsset: 'assets/images/headers/destination_header.jpg',
+          title: 'CẬP NHẬT ỨNG DỤNG',
+          subtitle: 'Phiên bản mới 2.0 đã sẵn sàng với giao diện tối ưu hơn...',
+          time: '1 ngày trước',
+        ),
+
+        // Item 8
+        _NotificationListItem(
+          imageAsset: 'assets/images/notification/spicybox.png',
+          title: 'VOUCHER SẮP HẾT HẠN',
+          subtitle:
+              'Voucher giảm 15% của bạn sẽ hết hạn vào ngày mai. Dùng ngay!',
+          time: '1 ngày trước',
+        ),
+
+        // Item 9
+        _NotificationListItem(
+          imageAsset: 'assets/images/chat/the_reverie_saigon.png',
+          title: 'CHÀO MỪNG BẠN MỚI',
+          subtitle: 'Cảm ơn bạn đã tham gia iTour. Tặng bạn 500 điểm thưởng...',
+          time: '3 ngày trước',
+        ),
+
+        // Item 10
+        _NotificationListItem(
+          imageAsset: 'assets/images/DiaDiem/ben_thanh.jpg',
+          title: 'SỰ KIỆN CUỐI TUẦN',
+          subtitle: 'Chợ Bến Thành tổ chức lễ hội ẩm thực đường phố đêm nay...',
+          time: '4 ngày trước',
+        ),
+      ],
+    );
+  }
+
+  // Danh sách Gợi ý
+  Widget _buildSuggestionList() {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      children: const [
+        // Item 1
+        _NotificationListItem(
+          imageAsset: 'assets/images/headers/destination_header.jpg',
+          title: 'KHÁM PHÁ ĐÀ LẠT',
+          subtitle: 'Mùa này Đà Lạt đang rất đẹp, săn mây ngay...',
+          time: 'Vừa xong',
+          hasBadge: true,
+          badgeCount: '1',
+        ),
+
+        // Item 2
+        _NotificationListItem(
+          imageAsset: 'assets/images/DiaDiem/landmark_81.jpg',
+          title: 'CHECK-IN LANDMARK 81',
+          subtitle: 'Ngắm toàn cảnh thành phố từ trên cao...',
+          time: '15 phút trước',
+        ),
+
         // Item 3
         _NotificationListItem(
           imageAsset: 'assets/images/notification/spicybox.png',
-          title: 'ƯU ĐÃI HÔM NAY',
-          subtitle: 'SpicyBox ưu đãi 15% chỉ hôm nay...',
-          time: '1 phút trước.',
+          title: 'VOUCHER GIẢM 50%',
+          subtitle: 'Dành riêng cho bạn khi ăn tại SpicyBox...',
+          time: '2 giờ trước',
+          hasBadge: true,
+          badgeCount: '1',
         ),
+
         // Item 4
         _NotificationListItem(
-          imageAsset: 'assets/images/chat/the_reverie_saigon.png',
-          title: 'ĐẶT PHÒNG THÀNH CÔNG',
-          subtitle: 'Bạn đã đặt thành công phòng ở...',
-          time: '10 giờ trước.',
+          imageAsset: 'assets/images/DiaDiem/ben_thanh.jpg',
+          title: 'ẨM THỰC CHỢ BẾN THÀNH',
+          subtitle: 'Top 5 món ăn nhất định phải thử khi đến đây...',
+          time: '3 giờ trước',
         ),
+
         // Item 5
         _NotificationListItem(
+          imageAsset: 'assets/images/chat/the_reverie_saigon.png',
+          title: 'KHÁCH SẠN 5 SAO',
+          subtitle: 'Trải nghiệm nghỉ dưỡng đẳng cấp tại Reverie...',
+          time: '5 giờ trước',
+        ),
+
+        // Item 6
+        _NotificationListItem(
           imageAsset: 'assets/images/notification/highlands.webp',
-          title: 'ƯU ĐÃI 20%',
-          subtitle: 'Ưu đãi 20% cho quán cà phê HighLands...',
-          time: '15 giờ trước.',
+          title: 'CÀ PHÊ CUỐI TUẦN',
+          subtitle: 'Highlands tặng bạn mã Freeship cho đơn từ 100k...',
+          time: '1 ngày trước',
+        ),
+
+        // Item 7
+        _NotificationListItem(
+          imageAsset: 'assets/images/DiaDiem/suoi_tien.jpg',
+          title: 'LỄ HỘI TRÁI CÂY',
+          subtitle: 'Sắp diễn ra tại Suối Tiên với nhiều hoạt động...',
+          time: '1 ngày trước',
+        ),
+
+        // Item 8
+        _NotificationListItem(
+          imageAsset: 'assets/images/DiaDiem/nha_tho_duc_ba.jpg',
+          title: 'GÓC CHỤP ẢNH ĐẸP',
+          subtitle: 'Hướng dẫn chụp ảnh check-in cực chất tại Quận 1...',
+          time: '2 ngày trước',
+        ),
+
+        // Item 9
+        _NotificationListItem(
+          imageAsset: 'assets/images/headers/destination_header.jpg',
+          title: 'BẠN MUỐN ĐI ĐÂU?',
+          subtitle: 'Cập nhật danh sách địa điểm hot tháng này...',
+          time: '2 ngày trước',
+        ),
+
+        // Item 10
+        _NotificationListItem(
+          imageAsset: 'assets/images/headers/destination_header.jpg',
+          title: 'CẨM NANG DU LỊCH',
+          subtitle: 'Những vật dụng không thể thiếu khi đi phượt...',
+          time: '3 ngày trước',
         ),
       ],
     );

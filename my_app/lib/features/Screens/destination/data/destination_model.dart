@@ -9,8 +9,6 @@ class DestinationModel {
   final String moTa;
   final String gioMoHang;
   final String giaVe;
-  final double latitude;
-  final double longitude;
 
   DestinationModel({
     required this.id,
@@ -21,22 +19,25 @@ class DestinationModel {
     required this.moTa,
     required this.gioMoHang,
     required this.giaVe,
-    required this.latitude,
-    required this.longitude,
   });
 
   factory DestinationModel.fromMap(Map<String, dynamic> map, String docId) {
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return DestinationModel(
       id: docId,
       ten: map['ten'] ?? 'Chưa rõ',
       diaChiBo: map['dia_chi'] ?? '',
       hinhAnh: map['hinh_anh'] ?? '',
-      danhGia: (map['danh_gia'] as num?)?.toDouble() ?? 0.0,
-      moTa: map['mo_ta'] ?? '',
+      danhGia: parseDouble(map['danh_gia']),
+      moTa: map['mo_ta_ngan'] ?? map['mo_ta'] ?? '',
       gioMoHang: map['gio_mo_hang'] ?? 'Không rõ',
       giaVe: map['gia_ve'] ?? 'Liên hệ',
-      latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

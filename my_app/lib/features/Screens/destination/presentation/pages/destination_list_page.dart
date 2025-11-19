@@ -7,6 +7,8 @@ import '../widgets/destination_card.dart';
 import '../widgets/page_header_with_filters.dart';
 import '../../../../home/presentation/widgets/skeletons.dart';
 
+import '../widgets/destination_detail_dialog.dart';
+
 class DestinationListPage extends StatefulWidget {
   const DestinationListPage({super.key});
 
@@ -22,7 +24,6 @@ class _DestinationListPageState extends State<DestinationListPage>
 
   // ======= STATE CƠ BẢN =======
   String? _selectedDistrictId;
-
   String? _selectedDestinationId;
 
   final _searchCtrl = TextEditingController();
@@ -74,7 +75,6 @@ class _DestinationListPageState extends State<DestinationListPage>
     super.dispose();
   }
 
-  //Hàm _openFilterSheet
   Future<void> _openFilterSheet() async {
     var tempRating = _minRating;
     await showModalBottomSheet(
@@ -161,8 +161,7 @@ class _DestinationListPageState extends State<DestinationListPage>
   @override
   Widget build(BuildContext context) {
     const dividerColor = Color(0xFFB5E100);
-
-    //Widget districtChips
+    // Phần districtChips
     final districtChips = SizedBox(
       height: 40,
       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -230,13 +229,13 @@ class _DestinationListPageState extends State<DestinationListPage>
       ),
     );
 
-    //Biến 'content' và phần 'PageHeaderWithFilters', 'Search'
     final content = FadeTransition(
       opacity: _fadeIn,
       child: SlideTransition(
         position: _slideUp,
         child: Column(
           children: [
+            // Header và Search
             PageHeaderWithFilters(
               title: 'ĐIỂM ĐẾN',
               imagePath: 'assets/images/headers/destination_header.jpg',
@@ -311,7 +310,6 @@ class _DestinationListPageState extends State<DestinationListPage>
                   district: _selectedDistrictId,
                 ),
                 builder: (context, snapshot) {
-                  //Phần logic skeleton và lọc data
                   if (snapshot.hasData && !_listDataArrived) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) setState(() => _listDataArrived = true);
@@ -353,7 +351,6 @@ class _DestinationListPageState extends State<DestinationListPage>
                     itemCount: data.length,
                     itemBuilder: (context, index) {
                       final h = data[index];
-                      // SỬA ĐỔI: Lấy trạng thái selected
                       final isSelected = _selectedDestinationId == h.id;
 
                       return KeyedSubtree(
@@ -365,9 +362,13 @@ class _DestinationListPageState extends State<DestinationListPage>
                             setState(() => _selectedDestinationId =
                                 isSelected ? null : h.id);
                           },
+                          //Sử dụng widget Dialog
                           onDetailPressed: () {
-                            // TODO: Điều hướng sang màn chi tiết
-                            print('Navigating to detail for ${h.id}');
+                            showDialog(
+                              context: context,
+                              builder: (ctx) =>
+                                  DestinationDetailDialog(destination: h),
+                            );
                           },
                         ),
                       );
@@ -381,7 +382,7 @@ class _DestinationListPageState extends State<DestinationListPage>
       ),
     );
 
-    //Overlay và Scaffold
+    // Overlay Skeleton và Scaffold
     final overlay = IgnorePointer(
       ignoring: !_showPageSkeleton,
       child: AnimatedSwitcher(
@@ -442,9 +443,10 @@ class _DestinationListPageState extends State<DestinationListPage>
   }
 }
 
-//_SkeletonBox
+// class _SkeletonBox
 class _SkeletonBox extends StatefulWidget {
-  const _SkeletonBox({this.width, this.height = 16, this.borderRadius = 12});
+  const _SkeletonBox(
+      {super.key, this.width, this.height = 16, this.borderRadius = 12});
   final double? width;
   final double height;
   final double borderRadius;
