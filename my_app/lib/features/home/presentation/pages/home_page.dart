@@ -21,47 +21,78 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   static const Color kBgColor = Color(0xFFF7F9FC);
   static const Color kIndicator = Color(0xFF86B9FF);
 
-  int _pageIndex = 2; // 0: lịch, 1: chat, 2: home, 3: thông báo, 4: profile
+  int _pageIndex = 2;
 
-  // Danh sách trang
-  late final List<Widget> _pages = [
-    const TourPage(),
-    const ChatPage(),
-    // Home scroll content
-    StatefulBuilder(
-      builder: (BuildContext context, StateSetter setHomeState) {
-        String? selectedQuan;
-        bool showFilterPanel = false;
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              HomeAppBar(
-                onFilterTap: () =>
-                    setHomeState(() => showFilterPanel = !showFilterPanel),
+  // ⭐ FIX: state thực sự nằm ở HomePage
+  String? selectedQuan;
+  bool showFilterPanel = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBgColor,
+      body: SafeArea(
+        bottom: false,
+        child: IndexedStack(
+          index: _pageIndex,
+          children: [
+            const TourPage(),
+            const ChatPage(),
+
+            // ⭐ HOME PAGE KHÔNG DÙNG StatefulBuilder NỮA
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  HomeAppBar(
+                    onFilterTap: () {
+                      setState(() {
+                        showFilterPanel = !showFilterPanel;
+                      });
+                    },
+                  ),
+
+                  if (showFilterPanel)
+                    FilterPanel(
+                      selectedQuan: selectedQuan,
+                      onQuanSelected: (quan) {
+                        setState(() {
+                          selectedQuan = quan;
+                          showFilterPanel = false;
+                        });
+                      },
+                      onClear: () {
+                        setState(() {
+                          selectedQuan = null;
+                          showFilterPanel = false;
+                        });
+                      },
+                    ),
+
+                  const HomeBanner(),
+                  const CategoriesSection(),
+
+                  // ⭐ truyền selectedQuan xuống để lọc
+                  SuggestedPlacesSection(selectedQuan: selectedQuan),
+                ],
               ),
-              if (showFilterPanel)
-                FilterPanel(
-                  selectedQuan: selectedQuan,
-                  onQuanSelected: (quan) => setHomeState(() {
-                    selectedQuan = quan;
-                    showFilterPanel = false;
-                  }),
-                  onClear: () => setHomeState(() {
-                    selectedQuan = null;
-                    showFilterPanel = false;
-                  }),
-                ),
-              const HomeBanner(),
-              const CategoriesSection(),
-              SuggestedPlacesSection(selectedQuan: selectedQuan),
-            ],
-          ),
-        );
-      },
-    ),
-    const NotificationPage(),
-    const ProfilePage(),
-  ];
+            ),
+
+            const NotificationPage(),
+            const ProfilePage(),
+          ],
+        ),
+      ),
+      bottomNavigationBar: _BottomNavBar(
+        currentIndex: _pageIndex,
+        icons: _navIcons,
+        barColor: kBarColor,
+        indicatorColor: kIndicator,
+        onTap: (i) {
+          setState(() => _pageIndex = i);
+        },
+      ),
+    );
+  }
 
   // Icon cho từng tab
   final List<Map<String, IconData>> _navIcons = const [
@@ -71,25 +102,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     {'filled': Icons.notifications, 'outlined': Icons.notifications_outlined},
     {'filled': Icons.person, 'outlined': Icons.person_outline},
   ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBgColor,
-      body: SafeArea(
-        bottom: false,
-        child: IndexedStack(index: _pageIndex, children: _pages),
-      ),
-      // Thanh điều hướng custom
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: _pageIndex,
-        icons: _navIcons,
-        barColor: kBarColor,
-        indicatorColor: kIndicator,
-        onTap: (i) => setState(() => _pageIndex = i),
-      ),
-    );
-  }
 }
 
 /// ================== Bottom Nav ==================
@@ -148,7 +160,7 @@ class _BottomNavBar extends StatelessWidget {
                   ),
                 ),
 
-                // VÒNG TRÒN (trượt)
+                // VÒNG TRÒN TRƯỢT
                 AnimatedPositioned(
                   duration: _animDur,
                   curve: _animCurve,
@@ -171,7 +183,7 @@ class _BottomNavBar extends StatelessWidget {
                   ),
                 ),
 
-                // HÀNG ICON
+                // ICON TAB
                 Row(
                   children: List.generate(itemCount, (i) {
                     final isActive = (i == currentIndex);
