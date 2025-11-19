@@ -38,9 +38,9 @@ class HotelCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,                       // box trắng
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: kCardBorder),    // ❌ không đổi sang xanh nữa
+          border: Border.all(color: kCardBorder),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -198,7 +198,8 @@ class HotelCard extends StatelessWidget {
                       ),
                       onPressed: onBookPressed,
                       icon: const Icon(Icons.calendar_month, size: 16),
-                      label: const Text('Đặt ngay'),
+                      label: const Text
+                        ('Đặt ngay',),
                     ),
                   ),
                 ),
