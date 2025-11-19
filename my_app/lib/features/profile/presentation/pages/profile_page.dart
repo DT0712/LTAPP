@@ -27,9 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
           builder: (context, snap) {
             final user = snap.data;
 
-            // Không có user
             if (user == null) {
-              // Nếu vừa sign out xong: hiển thị màn đã đăng xuất thành công
               if (_signedOut) {
                 return _SignedOut(
                   onGoLogin: () {
@@ -299,7 +297,6 @@ class _HeaderCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
-              // chỉ có nút edit bên phải (không có back)
               Row(
                 children: [
                   const Spacer(),

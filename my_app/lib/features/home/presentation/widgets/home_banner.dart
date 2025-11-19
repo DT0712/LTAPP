@@ -1,4 +1,3 @@
-// features/home/presentation/widgets/home_banner.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 

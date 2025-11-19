@@ -1,4 +1,3 @@
-// lib/features/home/presentation/widgets/suggested_places_section.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // ← BẮT BUỘC
 import '../../data/home_references.dart';
