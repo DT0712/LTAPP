@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../../home/data/home_references.dart';
 import '../../data/food_repository.dart';
+
 import '../widgets/food_card.dart';
-import '../widgets/big_triangle_clipper.dart';
-import '../widgets/small_triangle_clipper.dart';
+import '../widgets/food_appbar.dart';
+import '../widgets/food_tabbar.dart';
 
 class FoodPage extends StatefulWidget {
   const FoodPage({super.key});
@@ -39,71 +41,17 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+
+      // AppBar đã tách (FoodAppBar tự import clipper trong file của nó)
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(170),
-        child: Stack(
-          children: [
-            ClipPath(
-              clipper: BigTriangleClipper(),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFFFB300), Color(0xFFFFA000)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
-            ),
-            ClipPath(
-              clipper: SmallTriangleClipper(),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFFFE082), Color(0xFFFFB300)],
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                  ),
-                ),
-              ),
-            ),
-            SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new,
-                              color: Colors.white),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        const Text(
-                          "Quán ăn",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.filter_list_alt,
-                              color: Colors.white),
-                          onPressed: () => _showFilterDialog(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildTabBar(),
-                ],
-              ),
-            )
-          ],
+        child: FoodAppBar(
+          tabController: _tabController,
+          onBack: () => Navigator.pop(context),
+          onFilter: () => _showFilterDialog(context),
         ),
       ),
+
       body: Stack(
         children: [
           _buildBackground(),
@@ -124,43 +72,7 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
     );
   }
 
-  // ===================== WIDGETS =========================
-
-  Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        labelColor: Colors.orange.shade900,
-        unselectedLabelColor: Colors.white,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicator: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.orange.shade200.withOpacity(0.5),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            )
-          ],
-        ),
-        tabs: const [
-          Tab(text: "Gợi ý"),
-          Tab(text: "Gần tôi"),
-          Tab(text: "Giảm nhiều"),
-          Tab(text: "Mới nhất"),
-        ],
-      ),
-    );
-  }
+  // ================= WIDGETS ===================
 
   Widget _buildBackground() {
     return Container(
@@ -212,7 +124,7 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
     );
   }
 
-  // ===================== FILTER DIALOG =========================
+  // ================= FILTER DIALOG ===================
 
   void _showFilterDialog(BuildContext context) {
     showModalBottomSheet(
@@ -226,8 +138,10 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              const Text("Chọn quận",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text(
+                "Chọn quận",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               const Divider(),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
@@ -237,6 +151,7 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
+
                     final docs = snapshot.data!.docs;
 
                     return ListView.separated(
@@ -244,7 +159,6 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
                       separatorBuilder: (_, __) => const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final data = docs[index].data() as Map<String, dynamic>;
-
                         final ten = HomeReferences.cleanText(
                             data['ten'] ?? docs[index].id);
 
@@ -269,8 +183,10 @@ class _FoodPageState extends State<FoodPage> with TickerProviderStateMixin {
                   setState(() => selectedQuan = null);
                   Navigator.pop(context);
                 },
-                child: const Text("Bỏ lọc",
-                    style: TextStyle(color: Colors.redAccent)),
+                child: const Text(
+                  "Bỏ lọc",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
               ),
             ],
           ),
