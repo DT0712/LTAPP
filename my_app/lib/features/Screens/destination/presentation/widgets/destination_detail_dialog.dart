@@ -137,11 +137,8 @@ class DestinationDetailDialog extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                          Icons
-                              .confirmation_number, // Hoặc dùng Icons.local_activity
-                          color: Colors.green,
-                          size: 20),
+                      const Icon(Icons.confirmation_number,
+                          color: Colors.green, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

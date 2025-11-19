@@ -31,37 +31,77 @@ class ChatPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          //Danh sách chat
+          // Danh sách chat
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.only(top: 16.0),
+              padding: const EdgeInsets.only(top: 16.0, bottom: 20.0),
               children: const [
+                // Item 1
                 ChatListItem(
                   avatarAsset: 'assets/images/chat/com_que_duong_bau.png',
                   name: 'Cơm quê dượng bầu',
                   message: 'Bạn: Tôi muốn đặt bàn vip ngày 7 tháng 12',
-                  time: '8.45 AM',
+                  time: '8:45 AM',
                 ),
+
+                // Item 2
                 ChatListItem(
                   avatarAsset: 'assets/images/chat/the_reverie_saigon.png',
                   name: 'The Reverie Saigon',
                   message: 'Bạn: Bên bạn còn phòng đôi ngày 6 tháng 12 không?',
-                  time: '6.30 AM',
+                  time: '6:30 AM',
                 ),
+
+                // Item 3
+                ChatListItem(
+                  avatarAsset: 'assets/images/notification/spicybox.png',
+                  name: 'Spicy Box Thảo Điền',
+                  message:
+                      'Bạn: Vé buffet hiện tại bao nhiêu một người vậy shop?',
+                  time: '30 phút trước',
+                ),
+
+                // Item 4
                 ChatListItem(
                   avatarAsset:
                       'assets/images/chat/KunKin_garden_aparthotel.jpg',
                   name: 'KunKin Garden Aparthotel',
                   message: 'Xin lỗi bên mình hiện tại đã hết phòng đôi ạ.',
-                  time: '3 weeks',
+                  time: 'Hôm qua',
                 ),
+
+                // Item 5
+                ChatListItem(
+                  avatarAsset: 'assets/images/DiaDiem/landmark_81.jpg',
+                  name: 'CSKH Landmark 81',
+                  message: 'Dạ đài quan sát SkyView mở cửa đến 22h00 ạ.',
+                  time: 'Hôm qua',
+                ),
+
+                // Item 6
                 ChatListItem(
                   avatarAsset: 'assets/images/chat/phuc_long.webp',
-                  name: 'Phúc Long',
-                  message: 'Cảm ơn quý khách đã sử dụng dịch vụ bên mình',
-                  time: '2 months',
+                  name: 'Phúc Long Tea & Coffee',
+                  message: 'Cảm ơn quý khách đã sử dụng dịch vụ bên mình.',
+                  time: '2 ngày trước',
                 ),
-                // Thêm các mục chat khác ở đây
+
+                // Item 7
+                ChatListItem(
+                  avatarAsset: 'assets/images/DiaDiem/suoi_tien.jpg',
+                  name: 'Phòng vé Suối Tiên',
+                  message: 'Vé combo trò chơi đã được gửi vào email của bạn.',
+                  time: '1 tuần trước',
+                ),
+
+                // Item 8
+                ChatListItem(
+                  avatarAsset: 'assets/images/headers/destination_header.jpg',
+                  name: 'Hỗ trợ viên iTour',
+                  message:
+                      'Chào bạn, mình có thể giúp gì cho chuyến đi sắp tới?',
+                  time: '2 tuần trước',
+                ),
               ],
             ),
           ),
@@ -94,8 +134,8 @@ class ChatListItem extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => ChatDetailPage(
-              name: name, // Truyền tên
-              avatarAsset: avatarAsset, // Truyền ảnh
+              name: name,
+              avatarAsset: avatarAsset,
             ),
           ),
         );

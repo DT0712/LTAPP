@@ -27,7 +27,7 @@ class DestinationCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        //animation, margin, padding của Card
+        // Animation, margin, padding của Card
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -36,7 +36,7 @@ class DestinationCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: kCardBorder),
-          //Shadow của Card
+          // Shadow của Card
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -50,7 +50,7 @@ class DestinationCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ảnh (Đã thêm Hero)
+                // Ảnh
                 Hero(
                   tag: destination.id, // Tag quan trọng để tạo hiệu ứng bay
                   child: ClipRRect(
@@ -59,7 +59,6 @@ class DestinationCard extends StatelessWidget {
                       width: 120,
                       height: 90,
                       child: Image.asset(
-                        // Sửa đường dẫn mặc định cho đồng bộ
                         img.isEmpty ? 'assets/images/DiaDiem/default.png' : img,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(

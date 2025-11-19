@@ -362,7 +362,8 @@ class _DestinationListPageState extends State<DestinationListPage>
                             setState(() => _selectedDestinationId =
                                 isSelected ? null : h.id);
                           },
-                          //Sử dụng widget Dialog
+                          //
+                          //Widget Dialog
                           onDetailPressed: () {
                             showDialog(
                               context: context,

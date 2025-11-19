@@ -328,10 +328,10 @@ class _NotificationListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tiêu đề (title) LUÔN LUÔN có màu đen đậm.
+    // Màu tiêu đề
     const Color titleColor = Colors.black87;
 
-    // Phụ đề (subtitle) thay đổi màu dựa trên 'hasBadge'.
+    // Phụ đề thay đổi màu dựa trên 'hasBadge'.
     final Color subtitleColor = hasBadge ? Colors.black! : Colors.grey[500]!;
 
     return Padding(

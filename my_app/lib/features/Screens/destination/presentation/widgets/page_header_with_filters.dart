@@ -54,13 +54,12 @@ class PageHeaderWithFilters extends StatelessWidget {
                 top: 55,
                 left: 10,
                 child: Container(
-                  width: 44, // Kích thước vòng tròn
-                  height: 44, // Kích thước vòng tròn
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.85), // Màu trắng đục
+                    color: Colors.white.withOpacity(0.85),
                     boxShadow: [
-                      // Thêm bóng nhẹ cho nút
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
                         blurRadius: 4,
@@ -70,7 +69,7 @@ class PageHeaderWithFilters extends StatelessWidget {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back,
-                        color: Colors.black87, size: 24), //Màu icon
+                        color: Colors.black87, size: 24),
                     onPressed: onBack,
                     tooltip: 'Quay lại',
                   ),
