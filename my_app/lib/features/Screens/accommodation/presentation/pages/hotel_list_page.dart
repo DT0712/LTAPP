@@ -152,7 +152,7 @@ class _HotelListPageState extends State<HotelListPage>
                   // Khoảng giá
                   Row(
                     children: [
-                      const Text('Khoảng giá (VND/đêm)',
+                      const Text('Giá (VND/đêm)',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w600)),
                       const Spacer(),
